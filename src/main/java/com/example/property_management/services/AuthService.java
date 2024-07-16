@@ -1,5 +1,6 @@
 package com.example.property_management.services;
 
+import com.example.property_management.config.JwtService;
 import com.example.property_management.models.User;
 import com.example.property_management.repositories.AuthRepository;
 import org.slf4j.Logger;
@@ -7,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -15,13 +17,21 @@ public class AuthService {
     @Autowired
     AuthRepository authRepository;
 
+    @Autowired
+    PasswordEncoder passwordEncoder;
+
+    @Autowired
+    JwtService jwtService;
+
     public ResponseEntity<Object> register(User user){
         if(user.getFirstName()!=null && user.getLastName()!=null && user.getEmail()!=null && user.getPassword()!=null && user.getPhoneNumber()!=null){
-            if(authRepository.findOneByEmail(user.getEmail())!=null){
+            if(authRepository.findByEmail(user.getEmail()).isPresent()){
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User already exists");
             }
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
             authRepository.save(user);
-            return ResponseEntity.status(HttpStatus.CREATED).body("User created successfully");
+            var jwtToken = jwtService.generateToken(user);
+            return ResponseEntity.status(HttpStatus.CREATED).body(jwtToken);
         }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Fields can't be empty");
     }
