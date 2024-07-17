@@ -1,5 +1,6 @@
 package com.example.property_management.config;
 
+import com.example.property_management.services.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

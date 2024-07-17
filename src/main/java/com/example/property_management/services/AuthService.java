@@ -1,6 +1,5 @@
 package com.example.property_management.services;
 
-import com.example.property_management.config.JwtService;
 import com.example.property_management.models.User;
 import com.example.property_management.repositories.AuthRepository;
 import org.slf4j.Logger;

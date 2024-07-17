@@ -1,4 +1,4 @@
-package com.example.property_management.config;
+package com.example.property_management.services;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
