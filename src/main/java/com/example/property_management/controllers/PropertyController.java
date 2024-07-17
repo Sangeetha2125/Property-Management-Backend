@@ -10,22 +10,22 @@ import org.springframework.web.bind.annotation.*;
 import java.math.BigInteger;
 
 @RestController
-@RequestMapping("/properties")
+@RequestMapping("/api/properties")
 public class PropertyController {
 
     @Autowired
     private PropertyService propertyService;
 
     @SneakyThrows
-    @GetMapping("/owner/")
-    public ResponseEntity<Object> getAllOwnerProperties(){
-        return propertyService.getAllOwnerProperties();
+    @GetMapping("/")
+    public ResponseEntity<Object> getAllProperties(){
+        return propertyService.getAllProperties();
     }
 
     @SneakyThrows
-    @GetMapping("/owner/:id")
-    public ResponseEntity<Object> getOwnerPropertyById(@RequestParam BigInteger id){
-        return propertyService.getOwnerPropertyById(id);
+    @GetMapping("/:id")
+    public ResponseEntity<Object> getPropertyById(@RequestParam BigInteger id){
+        return propertyService.getPropertyById(id);
     }
 
     @SneakyThrows

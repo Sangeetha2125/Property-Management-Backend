@@ -3,6 +3,7 @@ package com.example.property_management.services;
 import com.example.property_management.models.Property;
 import com.example.property_management.models.User;
 import com.example.property_management.repositories.PropertyRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,21 +16,24 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+@Slf4j
 @Service
 public class PropertyService {
     @Autowired
     private PropertyRepository propertyRepository;
 
-    public boolean isOwner(){
+    private boolean isAuthenticated(){
         Authentication authContext = SecurityContextHolder.getContext().getAuthentication();
-        if(authContext!=null && authContext.isAuthenticated()){
-            User authenticatedUser = (User) authContext.getPrincipal();
-            return authenticatedUser.getRole().name().equals("OWNER");
-        }
-        return false;
+        return authContext!=null && authContext.isAuthenticated();
     }
 
-    public User getCurrentOwner(){
+    private boolean isOwner(){
+        Authentication authContext = SecurityContextHolder.getContext().getAuthentication();
+        User authenticatedUser = (User) authContext.getPrincipal();
+        return authenticatedUser.getRole().name().equals("OWNER");
+    }
+
+    private User getCurrentOwner(){
         Authentication authContext = SecurityContextHolder.getContext().getAuthentication();
         return (User) authContext.getPrincipal();
     }
@@ -47,23 +51,29 @@ public class PropertyService {
         return property;
     }
 
-    public ResponseEntity<Object> getAllOwnerProperties(){
-        if(isOwner()){
-            User user = getCurrentOwner();
-            List<Property> properties = propertyRepository.findAllByOwnerId(user);
+    public ResponseEntity<Object> getAllProperties(){
+        if(isAuthenticated()){
+            if(isOwner()){
+                User user = getCurrentOwner();
+                List<Property> properties = propertyRepository.findAllByOwnerId(user);
+                return ResponseEntity.status(HttpStatus.OK).body(properties);
+            }
+            List<Property> properties = propertyRepository.findAll();
             return ResponseEntity.status(HttpStatus.OK).body(properties);
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized to access this route");
     }
 
-    public ResponseEntity<Object> getOwnerPropertyById(BigInteger id){
-        if(isOwner()){
+    public ResponseEntity<Object> getPropertyById(BigInteger id){
+        if(isAuthenticated()){
             Optional<Property> property = propertyRepository.findById(id);
             if(property.isPresent()){
-                if(Objects.equals(property.get().getOwnerId().getId(), getCurrentOwner().getId())){
-                    return ResponseEntity.status(HttpStatus.OK).body(property.get());
+                if(isOwner()){
+                    if(Objects.equals(property.get().getOwnerId().getId(), getCurrentOwner().getId())){
+                        return ResponseEntity.status(HttpStatus.OK).body(property.get());
+                    }
                 }
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized to access this route");
+                return ResponseEntity.status(HttpStatus.OK).body(property.get());
             }
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Property not found");
         }
