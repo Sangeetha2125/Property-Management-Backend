@@ -33,7 +33,7 @@ public class PropertyService {
         return authenticatedUser.getRole().name().equals("OWNER");
     }
 
-    private User getCurrentOwner(){
+    private User getCurrentUser(){
         Authentication authContext = SecurityContextHolder.getContext().getAuthentication();
         return (User) authContext.getPrincipal();
     }
@@ -47,14 +47,14 @@ public class PropertyService {
         property.setPincode(requestProperty.getPincode());
         property.setNumUnits(requestProperty.getNumUnits());
         property.setType(requestProperty.getType());
-        property.setOwnerId(getCurrentOwner());
+        property.setOwnerId(getCurrentUser());
         return property;
     }
 
     public ResponseEntity<Object> getAllProperties(){
         if(isAuthenticated()){
             if(isOwner()){
-                User user = getCurrentOwner();
+                User user = getCurrentUser();
                 List<Property> properties = propertyRepository.findAllByOwnerId(user);
                 return ResponseEntity.status(HttpStatus.OK).body(properties);
             }
@@ -69,7 +69,7 @@ public class PropertyService {
             Optional<Property> property = propertyRepository.findById(id);
             if(property.isPresent()){
                 if(isOwner()){
-                    if(Objects.equals(property.get().getOwnerId().getId(), getCurrentOwner().getId())){
+                    if(Objects.equals(property.get().getOwnerId().getId(), getCurrentUser().getId())){
                         return ResponseEntity.status(HttpStatus.OK).body(property.get());
                     }
                 }
@@ -81,7 +81,7 @@ public class PropertyService {
     }
 
     public ResponseEntity<Object> addProperty(Property requestProperty){
-        if(isOwner()){
+        if(isAuthenticated() && isOwner()){
             if(requestProperty.getName()!=null && requestProperty.getCity()!=null && requestProperty.getAddress()!=null && requestProperty.getPincode()!=null && requestProperty.getState()!=null && requestProperty.getNumUnits()!=0 && requestProperty.getType()!=null){
                 Property property = getProperty(requestProperty);
                 propertyRepository.save(property);
@@ -93,10 +93,11 @@ public class PropertyService {
     }
 
     public ResponseEntity<Object> updateProperty(Property requestProperty, BigInteger id){
-        if(isOwner()){
+        if(isAuthenticated() && isOwner()){
             Optional<Property> property = propertyRepository.findById(id);
             if(property.isPresent()){
-                if(Objects.equals(property.get().getOwnerId().getId(), getCurrentOwner().getId())){
+                if(Objects.equals(property.get().getOwnerId().getId(), getCurrentUser().getId())){
+                    requestProperty.setOwnerId(getCurrentUser());
                     propertyRepository.save(requestProperty);
                     return ResponseEntity.status(HttpStatus.OK).body("Property updated successfully");
                 }

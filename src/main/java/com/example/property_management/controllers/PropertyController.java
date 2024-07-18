@@ -23,8 +23,8 @@ public class PropertyController {
     }
 
     @SneakyThrows
-    @GetMapping("/:id")
-    public ResponseEntity<Object> getPropertyById(@RequestParam BigInteger id){
+    @GetMapping("/{id}")
+    public ResponseEntity<Object> getPropertyById(@PathVariable BigInteger id){
         return propertyService.getPropertyById(id);
     }
 
@@ -35,8 +35,8 @@ public class PropertyController {
     }
 
     @SneakyThrows
-    @PutMapping("/:id")
-    public ResponseEntity<Object> updateProperty(@RequestBody Property property, @RequestParam BigInteger id){
+    @PutMapping("/{id}")
+    public ResponseEntity<Object> updateProperty(@RequestBody Property property, @PathVariable BigInteger id){
         return propertyService.updateProperty(property, id);
     }
 }

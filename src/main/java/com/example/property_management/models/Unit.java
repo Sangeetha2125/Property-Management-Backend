@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import java.math.BigInteger;
+import java.util.Date;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -17,10 +18,11 @@ import java.math.BigInteger;
 @Entity
 public class Unit {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private BigInteger id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "property_id")
     private Property propertyId;
 

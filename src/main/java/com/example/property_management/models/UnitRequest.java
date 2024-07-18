@@ -21,6 +21,7 @@ import java.util.Date;
 public class UnitRequest {
     @Column(name="id")
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private BigInteger id;
 
     @ManyToOne
@@ -44,6 +45,7 @@ public class UnitRequest {
 
     @JsonFormat(pattern = "dd-mm-yyyy hh:")
     @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "request_date")
     private Date requestDate;
 
     @PrePersist
