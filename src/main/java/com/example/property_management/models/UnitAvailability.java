@@ -1,6 +1,7 @@
 package com.example.property_management.models;
 
 import com.example.property_management.enums.UnitType;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -37,7 +38,7 @@ public class UnitAvailability {
     private Integer securityDeposit;
 
     @Column(name = "monthly_due_date")
-    private Date monthlyDueDate;
+    private Integer monthlyDueDate;
 
 //    Document upload url
 }

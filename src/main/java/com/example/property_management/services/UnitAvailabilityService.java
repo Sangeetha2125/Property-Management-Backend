@@ -2,7 +2,6 @@ package com.example.property_management.services;
 
 import com.example.property_management.enums.AvailabilityStatus;
 import com.example.property_management.enums.UnitType;
-import com.example.property_management.models.Property;
 import com.example.property_management.models.Unit;
 import com.example.property_management.models.UnitAvailability;
 import com.example.property_management.models.User;
@@ -95,7 +94,7 @@ public class UnitAvailabilityService {
                             if(existingUnitAvailability.get().getAvailabilityType().equals(unitAvailability.getAvailabilityType())){
                                 unitAvailability.setUnitId(unit.get());
                                 unitAvailabilityRepository.save(unitAvailability);
-//                                Trigger to update current agreement and create new agreement line item
+//                                Trigger to update current agreement and create new agreement line item as the amount changes
                                 return ResponseEntity.status(HttpStatus.CREATED).body("Unit availability updated successfully");
                             }
                             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Unit availability type can't be changed");
