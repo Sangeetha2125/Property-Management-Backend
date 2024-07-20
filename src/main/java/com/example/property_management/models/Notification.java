@@ -14,7 +14,7 @@ import java.util.Date;
 @NoArgsConstructor
 @ToString
 @Data
-@Table(name="agreement")
+@Table(name="notification")
 @Entity
 public class Notification {
     @Id

@@ -40,4 +40,9 @@ public class Transaction {
     @Column(name = "payment_method")
     @Enumerated(EnumType.STRING)
     private PaymentMethod paymentMethod;
+
+    @PrePersist
+    private void onCreate() {
+        transactionTime = new Date();
+    }
 }
