@@ -1,7 +1,6 @@
 package com.example.property_management.controllers;
 
 import com.example.property_management.models.Unit;
-import com.example.property_management.models.UnitRequest;
 import com.example.property_management.services.UnitService;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;

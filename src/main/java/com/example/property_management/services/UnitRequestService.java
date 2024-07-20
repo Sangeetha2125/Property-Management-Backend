@@ -1,7 +1,6 @@
 package com.example.property_management.services;
 
 import com.example.property_management.enums.UnitRequestStatus;
-import com.example.property_management.models.Property;
 import com.example.property_management.models.Unit;
 import com.example.property_management.models.UnitRequest;
 import com.example.property_management.models.User;
@@ -67,6 +66,9 @@ public class UnitRequestService {
                if(Objects.equals(getCurrentUser().getId(), unitRequest.get().getUnitId().getPropertyId().getOwnerId().getId())){
                    if(unitRequest.get().getStatus()!= UnitRequestStatus.PENDING && unitRequestStatus!=UnitRequestStatus.PENDING){
                        unitRequest.get().setStatus(unitRequestStatus);
+                       if(unitRequest.get().getStatus()==UnitRequestStatus.ACCEPTED){
+//                           Create a new agreement
+                       }
                        unitRequestRepository.save(unitRequest.get());
                        return ResponseEntity.status(HttpStatus.OK).body("Request responded successfully");
                    }
@@ -100,6 +102,17 @@ public class UnitRequestService {
     }
 
     public ResponseEntity<Object> deleteRequestById(BigInteger requestId){
-        return null;
+        if(isAuthenticated() && !isOwner()){
+            Optional<UnitRequest> unitRequest = unitRequestRepository.findById(requestId);
+            if(unitRequest.isPresent()){
+                if(Objects.equals(getCurrentUser().getId(), unitRequest.get().getUserId().getId())){
+                    unitRequestRepository.deleteById(requestId);
+                    return ResponseEntity.status(HttpStatus.OK).body("Unit request deleted successfully");
+                }
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized to access this route");
+            }
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Request not found");
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized to access this route");
     }
 }

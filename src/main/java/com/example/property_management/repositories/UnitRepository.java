@@ -7,7 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.math.BigInteger;
 import java.util.List;
-import java.util.Optional;
 
 public interface UnitRepository extends JpaRepository<Unit, BigInteger> {
     List<Unit> findAllByPropertyId(Property property);

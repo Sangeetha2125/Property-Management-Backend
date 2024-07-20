@@ -1,7 +1,6 @@
 package com.example.property_management.models;
 
 import com.example.property_management.enums.UnitType;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
