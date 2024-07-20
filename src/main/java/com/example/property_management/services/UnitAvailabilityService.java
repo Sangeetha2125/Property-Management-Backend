@@ -47,7 +47,7 @@ public class UnitAvailabilityService {
     public ResponseEntity<Object> setUnitAvailabilities(UnitAvailability unitAvailability, BigInteger unitId){
         if(isAuthenticated() && isOwner()){
             if(unitAvailability.getAvailabilityType()!=null && unitAvailability.getAmount()!=0){
-                if(unitAvailability.getAvailabilityType() == UnitType.RENT && unitAvailability.getMonthlyDueDate()!=null) {
+                if(unitAvailability.getAvailabilityType() == UnitType.RENT && unitAvailability.getMonthlyDue()!=null) {
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Monthly due date is required");
                 }
                 Optional<Unit> unit = unitRepository.findById(unitId);
@@ -83,7 +83,7 @@ public class UnitAvailabilityService {
     public ResponseEntity<Object> updateUnitAvailability(UnitAvailability unitAvailability, BigInteger unitId){
         if(isAuthenticated() && isOwner()){
             if(unitAvailability.getAvailabilityType()!=null && unitAvailability.getAmount()!=0){
-                if(unitAvailability.getAvailabilityType() == UnitType.RENT && unitAvailability.getMonthlyDueDate()!=null) {
+                if(unitAvailability.getAvailabilityType() == UnitType.RENT && unitAvailability.getMonthlyDue()!=null) {
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Monthly due date is required");
                 }
                 Optional<Unit> unit = unitRepository.findById(unitId);

@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import java.math.BigInteger;
-import java.util.Date;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -36,8 +35,8 @@ public class UnitAvailability {
     @Column(name = "security_deposit")
     private Integer securityDeposit;
 
-    @Column(name = "monthly_due_date")
-    private Integer monthlyDueDate;
+    @Column(name = "monthly_due")
+    private Integer monthlyDue;
 
 //    Document upload url
 }
