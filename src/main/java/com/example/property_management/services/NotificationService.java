@@ -47,7 +47,7 @@ public class NotificationService {
     public  ResponseEntity<Object> deleteAllNotifications(){
         if(isAuthenticated() && isNotOwner()){
             notificationRepository.deleteAllNotificationsByUserId(getCurrentUser().getId().intValue());
-            return ResponseEntity.status(HttpStatus.OK).body("");
+            return ResponseEntity.status(HttpStatus.OK).body("Notifications deleted successfully");
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized to access this route");
     }
@@ -55,7 +55,7 @@ public class NotificationService {
     public ResponseEntity<Object> deleteNotificationById(BigInteger id){
         if(isAuthenticated() && isNotOwner()){
             notificationRepository.deleteNotificationById(id);
-            return ResponseEntity.status(HttpStatus.OK).body("");
+            return ResponseEntity.status(HttpStatus.OK).body("Notification deleted successfully");
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized to access this route");
     }
