@@ -24,10 +24,10 @@ public class Notification {
 
     @ManyToOne
     @JoinColumn(name = "agreement_id")
-    private Agreement agreementId;
+    private Agreement agreement;
 
     @Column(name = "notification_date")
-    @JsonFormat(pattern = "dd-mm-yyyy hh:")
+    @JsonFormat(pattern = "dd-MM-yyyy hh:")
     @Temporal(TemporalType.TIMESTAMP)
     private Date notificationDate;
 

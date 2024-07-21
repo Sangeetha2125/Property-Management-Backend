@@ -8,5 +8,5 @@ import java.math.BigInteger;
 import java.util.List;
 
 public interface UnitAvailabilityRepository extends JpaRepository<UnitAvailability, BigInteger> {
-    List<UnitAvailability> findAllByUnitId(Unit unit);
+    List<UnitAvailability> findAllByUnit(Unit unit);
 }

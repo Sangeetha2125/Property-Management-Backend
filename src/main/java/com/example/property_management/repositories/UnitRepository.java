@@ -9,7 +9,7 @@ import java.math.BigInteger;
 import java.util.List;
 
 public interface UnitRepository extends JpaRepository<Unit, BigInteger> {
-    List<Unit> findAllByPropertyId(Property property);
+    List<Unit> findAllByProperty(Property property);
 
-    List<Unit> findAllByPropertyIdAndAvailability(Property property, AvailabilityStatus availabilityStatus);
+    List<Unit> findAllByPropertyAndAvailability(Property property, AvailabilityStatus availabilityStatus);
 }

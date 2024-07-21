@@ -42,7 +42,7 @@ public class User implements UserDetails {
     private String password;
 
     @Column(name = "created_at", nullable = false)
-    @JsonFormat(pattern = "dd-mm-yyyy hh:")
+    @JsonFormat(pattern = "dd-MM-yyyy hh:")
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt;
 

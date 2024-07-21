@@ -24,15 +24,15 @@ public class Agreement {
 
     @OneToOne
     @JoinColumn(name = "request_id")
-    private UnitRequest requestId;
+    private UnitRequest request;
 
     @Column(name = "start_date")
-    @JsonFormat(pattern = "dd-mm-yyyy")
+    @JsonFormat(pattern = "dd-MM-yyyy")
     @Temporal(TemporalType.DATE)
     private Date startDate;
 
     @Column(name = "end_date")
-    @JsonFormat(pattern = "dd-mm-yyyy")
+    @JsonFormat(pattern = "dd-MM-yyyy")
     @Temporal(TemporalType.DATE)
     private Date endDate;
 

@@ -49,7 +49,7 @@ public class AgreementService {
         rentalAgreement.setStartDate(agreement.getStartDate());
         rentalAgreement.setEndDate(agreement.getEndDate());
         rentalAgreement.setMonthlyDue(agreement.getMonthlyDue());
-        rentalAgreement.setRequestId(unitRequest);
+        rentalAgreement.setRequest(unitRequest);
         rentalAgreement.setAmount(agreement.getAmount());
         rentalAgreement.setSecurityDeposit(agreement.getSecurityDeposit());
         return rentalAgreement;
@@ -58,7 +58,7 @@ public class AgreementService {
     private static Agreement getLeaseAgreement(Agreement agreement, UnitRequest unitRequest) {
         Agreement leaseAgreement = new Agreement();
         leaseAgreement.setAmount(agreement.getAmount());
-        leaseAgreement.setRequestId(unitRequest);
+        leaseAgreement.setRequest(unitRequest);
         leaseAgreement.setNumberOfYears(agreement.getNumberOfYears());
         return leaseAgreement;
     }
@@ -67,7 +67,7 @@ public class AgreementService {
         if(isAuthenticated() && isNotOwner()){
             Optional<UnitRequest> unitRequest = unitRequestRepository.findById(requestId);
             if(unitRequest.isPresent()){
-                if(Objects.equals(unitRequest.get().getUserId().getId(), getCurrentUser().getId())){
+                if(Objects.equals(unitRequest.get().getUser().getId(), getCurrentUser().getId())){
                     if(unitRequest.get().getStatus()==UnitRequestStatus.ACCEPTED){
                         if(agreement.getAmount()!=null){
                             if(unitRequest.get().getType()==UnitType.RENT && agreement.getStartDate()!=null && agreement.getEndDate()!=null && agreement.getMonthlyDue()!=null){
@@ -97,7 +97,7 @@ public class AgreementService {
         if(isAuthenticated() && isNotOwner()){
             Optional<UnitRequest> unitRequest = unitRequestRepository.findById(requestId);
             if(unitRequest.isPresent()){
-                if(Objects.equals(unitRequest.get().getUserId().getId(), getCurrentUser().getId())){
+                if(Objects.equals(unitRequest.get().getUser().getId(), getCurrentUser().getId())){
                     if(unitRequest.get().getStatus()==UnitRequestStatus.ACCEPTED){
                         unitRequest.get().setStatus(UnitRequestStatus.DENIED_BY_USER);
                         unitRequestRepository.save(unitRequest.get());

@@ -23,7 +23,7 @@ public class UnitAvailability {
 
     @ManyToOne
     @JoinColumn(name = "unit_id")
-    private Unit unitId;
+    private Unit unit;
 
     @Column(name = "availability_type")
     @Enumerated(EnumType.STRING)

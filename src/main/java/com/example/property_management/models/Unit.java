@@ -23,7 +23,7 @@ public class Unit {
 
     @ManyToOne
     @JoinColumn(name = "property_id")
-    private Property propertyId;
+    private Property property;
 
     @Column(name = "name")
     private String name;

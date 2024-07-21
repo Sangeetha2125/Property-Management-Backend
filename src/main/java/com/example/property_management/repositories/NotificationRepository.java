@@ -11,12 +11,12 @@ import java.util.List;
 
 public interface NotificationRepository extends JpaRepository<Notification, BigInteger> {
     @Query(value = "SELECT n FROM Notification n " +
-            "JOIN n.agreementId a " +
-            "JOIN a.requestId r " +
-            "JOIN r.userId u " +
+            "JOIN n.agreement a " +
+            "JOIN a.request r " +
+            "JOIN r.user u " +
             "WHERE u.id = :userId"
     )
-    List<Notification> findAllNotificationByUserId(BigInteger userId);
+    List<Notification> findAllNotificationByUser(BigInteger userId);
 
     @Modifying
     @Transactional
@@ -25,6 +25,6 @@ public interface NotificationRepository extends JpaRepository<Notification, BigI
 
     @Modifying
     @Transactional
-    @Query(value = "DELETE FROM Notification n WHERE n.agreementId.requestId.userId.id = :userId")
-    void deleteAllNotificationsByUserId(Integer userId);
+    @Query(value = "DELETE FROM Notification n WHERE n.agreement.request.user.id = :userId")
+    void deleteAllNotificationsByUser(Integer userId);
 }

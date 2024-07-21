@@ -47,7 +47,7 @@ public class PropertyService {
         property.setPincode(requestProperty.getPincode());
         property.setNumUnits(requestProperty.getNumUnits());
         property.setType(requestProperty.getType());
-        property.setOwnerId(getCurrentUser());
+        property.setOwner(getCurrentUser());
         return property;
     }
 
@@ -55,7 +55,7 @@ public class PropertyService {
         if(isAuthenticated()){
             if(isOwner()){
                 User user = getCurrentUser();
-                List<Property> properties = propertyRepository.findAllByOwnerId(user);
+                List<Property> properties = propertyRepository.findAllByOwner(user);
                 return ResponseEntity.status(HttpStatus.OK).body(properties);
             }
             List<Property> properties = propertyRepository.findAll();
@@ -69,7 +69,7 @@ public class PropertyService {
             Optional<Property> property = propertyRepository.findById(id);
             if(property.isPresent()){
                 if(isOwner()){
-                    if(Objects.equals(property.get().getOwnerId().getId(), getCurrentUser().getId())){
+                    if(Objects.equals(property.get().getOwner().getId(), getCurrentUser().getId())){
                         return ResponseEntity.status(HttpStatus.OK).body(property.get());
                     }
                 }
@@ -96,8 +96,8 @@ public class PropertyService {
         if(isAuthenticated() && isOwner()){
             Optional<Property> property = propertyRepository.findById(id);
             if(property.isPresent()){
-                if(Objects.equals(property.get().getOwnerId().getId(), getCurrentUser().getId())){
-                    requestProperty.setOwnerId(getCurrentUser());
+                if(Objects.equals(property.get().getOwner().getId(), getCurrentUser().getId())){
+                    requestProperty.setOwner(getCurrentUser());
                     propertyRepository.save(requestProperty);
                     return ResponseEntity.status(HttpStatus.OK).body("Property updated successfully");
                 }

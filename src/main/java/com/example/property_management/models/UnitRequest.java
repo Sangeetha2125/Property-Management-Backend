@@ -26,11 +26,11 @@ public class UnitRequest {
 
     @ManyToOne
     @JoinColumn(name = "unit_id")
-    private Unit unitId;
+    private Unit unit;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    private User userId;
+    private User user;
 
     @Column(name = "type")
     @Enumerated(EnumType.STRING)
@@ -43,7 +43,7 @@ public class UnitRequest {
     @Enumerated(EnumType.STRING)
     private UnitRequestStatus status;
 
-    @JsonFormat(pattern = "dd-mm-yyyy hh:")
+    @JsonFormat(pattern = "dd-MM-yyyy hh:")
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "request_date")
     private Date requestDate;

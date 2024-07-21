@@ -1,5 +1,6 @@
 package com.example.property_management.services;
 
+import com.example.property_management.models.AuthResponse;
 import com.example.property_management.models.User;
 import com.example.property_management.repositories.AuthRepository;
 import org.slf4j.Logger;
@@ -48,6 +49,9 @@ public class AuthService {
         );
         var verifiedUser = authRepository.findByEmail(user.getEmail()).orElseThrow();
         var jwtToken = jwtService.generateToken(verifiedUser);
-        return ResponseEntity.status(HttpStatus.OK).body(jwtToken);
+        AuthResponse authResponse = new AuthResponse();
+        authResponse.setToken(jwtToken);
+        authResponse.setRole(verifiedUser.getRole());
+        return ResponseEntity.status(HttpStatus.OK).body(authResponse);
     }
 }

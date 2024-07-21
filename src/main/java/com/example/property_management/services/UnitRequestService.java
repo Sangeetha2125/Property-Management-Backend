@@ -47,8 +47,8 @@ public class UnitRequestService {
             Optional<Unit> unit = unitRepository.findById(unitId);
             if(unit.isPresent()){
                 if(unitRequest.getType()!=null && unitRequest.getMessage()!=null){
-                    unitRequest.setUserId(getCurrentUser());
-                    unitRequest.setUnitId(unit.get());
+                    unitRequest.setUser(getCurrentUser());
+                    unitRequest.setUnit(unit.get());
                     unitRequestRepository.save(unitRequest);
                     return ResponseEntity.status(HttpStatus.CREATED).body("Request created successfully");
                 }
@@ -63,7 +63,7 @@ public class UnitRequestService {
         if(isAuthenticated() && isOwner()){
             Optional<UnitRequest> unitRequest = unitRequestRepository.findById(requestId);
             if(unitRequest.isPresent()){
-               if(Objects.equals(getCurrentUser().getId(), unitRequest.get().getUnitId().getPropertyId().getOwnerId().getId())){
+               if(Objects.equals(getCurrentUser().getId(), unitRequest.get().getUnit().getProperty().getOwner().getId())){
                    if(unitRequest.get().getStatus()!= UnitRequestStatus.PENDING && unitRequestStatus!=UnitRequestStatus.PENDING){
                        unitRequest.get().setStatus(unitRequestStatus);
                        if(unitRequest.get().getStatus()==UnitRequestStatus.ACCEPTED){
@@ -87,13 +87,13 @@ public class UnitRequestService {
             Optional<Unit> unit = unitRepository.findById(unitId);
             if(unit.isPresent()){
                 if(isOwner()){
-                    if(Objects.equals(getCurrentUser().getId(), unit.get().getPropertyId().getOwnerId().getId())){
-                        List<UnitRequest> unitRequests = unitRequestRepository.findAllByUnitId(unit.get());
+                    if(Objects.equals(getCurrentUser().getId(), unit.get().getProperty().getOwner().getId())){
+                        List<UnitRequest> unitRequests = unitRequestRepository.findAllByUnit(unit.get());
                         return ResponseEntity.status(HttpStatus.OK).body(unitRequests);
                     }
                     return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized to access this route");
                 }
-                List<UnitRequest> unitRequests = unitRequestRepository.findAllByUserIdAndUnitId(user,unit.get());
+                List<UnitRequest> unitRequests = unitRequestRepository.findAllByUserAndUnit(user,unit.get());
                 return ResponseEntity.status(HttpStatus.OK).body(unitRequests);
             }
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Unit not found");
@@ -105,7 +105,7 @@ public class UnitRequestService {
         if(isAuthenticated() && !isOwner()){
             Optional<UnitRequest> unitRequest = unitRequestRepository.findById(requestId);
             if(unitRequest.isPresent()){
-                if(Objects.equals(getCurrentUser().getId(), unitRequest.get().getUserId().getId())){
+                if(Objects.equals(getCurrentUser().getId(), unitRequest.get().getUser().getId())){
                     unitRequestRepository.deleteById(requestId);
                     return ResponseEntity.status(HttpStatus.OK).body("Unit request deleted successfully");
                 }

@@ -26,10 +26,10 @@ public class Transaction {
 
     @ManyToOne
     @JoinColumn(name = "agreement_id")
-    private Agreement agreementId;
+    private Agreement agreement;
 
     @Column(name = "transaction_time")
-    @JsonFormat(pattern = "dd-mm-yyyy hh:")
+    @JsonFormat(pattern = "dd-MM-yyyy hh:")
     @Temporal(TemporalType.TIMESTAMP)
     private Date transactionTime;
 

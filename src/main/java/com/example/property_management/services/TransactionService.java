@@ -47,9 +47,9 @@ public class TransactionService {
         if(isAuthenticated() && !isOwner()){
             Optional<Agreement> agreement = agreementRepository.findById(agreementId);
             if(agreement.isPresent()){
-                if(Objects.equals(agreement.get().getRequestId().getUserId().getId(), getCurrentUser().getId())){
+                if(Objects.equals(agreement.get().getRequest().getUser().getId(), getCurrentUser().getId())){
                     Transaction transaction = new Transaction();
-                    transaction.setAgreementId(agreement.get());
+                    transaction.setAgreement(agreement.get());
                     transaction.setStatus(PaymentStatus.PAID);
                     transaction.setPaymentMethod(PaymentMethod.NET_BANKING);
                     transactionRepository.save(transaction);

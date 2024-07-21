@@ -23,7 +23,7 @@ public class Property {
 
     @ManyToOne
     @JoinColumn(name = "owner_id")
-    private User ownerId;
+    private User owner;
 
     @Column(name = "name")
     private String name;

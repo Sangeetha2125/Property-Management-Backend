@@ -8,5 +8,5 @@ import java.math.BigInteger;
 import java.util.List;
 
 public interface PropertyRepository extends JpaRepository<Property, BigInteger> {
-    List<Property> findAllByOwnerId(User owner);
+    List<Property> findAllByOwner(User owner);
 }

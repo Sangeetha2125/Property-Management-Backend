@@ -1,8 +1,6 @@
 package com.example.property_management.services;
 
-import com.example.property_management.enums.UnitRequestStatus;
 import com.example.property_management.models.Notification;
-import com.example.property_management.models.UnitRequest;
 import com.example.property_management.models.User;
 import com.example.property_management.repositories.NotificationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +36,7 @@ public class NotificationService {
 
     public ResponseEntity<Object> getAllNotifications(){
         if(isAuthenticated() && isNotOwner()){
-            List<Notification> notifications = notificationRepository.findAllNotificationByUserId(getCurrentUser().getId());
+            List<Notification> notifications = notificationRepository.findAllNotificationByUser(getCurrentUser().getId());
             return ResponseEntity.status(HttpStatus.OK).body(notifications);
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized to access this route");
@@ -46,7 +44,7 @@ public class NotificationService {
 
     public  ResponseEntity<Object> deleteAllNotifications(){
         if(isAuthenticated() && isNotOwner()){
-            notificationRepository.deleteAllNotificationsByUserId(getCurrentUser().getId().intValue());
+            notificationRepository.deleteAllNotificationsByUser(getCurrentUser().getId().intValue());
             return ResponseEntity.status(HttpStatus.OK).body("Notifications deleted successfully");
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized to access this route");

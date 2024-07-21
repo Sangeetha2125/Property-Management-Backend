@@ -55,7 +55,7 @@ public class UnitService {
         unit.setBedrooms(requestUnit.getBedrooms());
         unit.setBathrooms(requestUnit.getBathrooms());
         unit.setDescription(requestUnit.getDescription());
-        unit.setPropertyId(property);
+        unit.setProperty(property);
         unit.setAvailability(AvailabilityStatus.UNAVAILABLE);
         return unit;
     }
@@ -66,13 +66,13 @@ public class UnitService {
             if(property.isPresent()) {
                 if(isOwner()){
                     User user = getCurrentUser();
-                    if(Objects.equals(property.get().getOwnerId().getId(), user.getId())){
-                        List<Unit> units = unitRepository.findAllByPropertyId(property.get());
+                    if(Objects.equals(property.get().getOwner().getId(), user.getId())){
+                        List<Unit> units = unitRepository.findAllByProperty(property.get());
                         return ResponseEntity.status(HttpStatus.OK).body(units);
                     }
                     return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized to access this route");
                 }
-                List<Unit> units = unitRepository.findAllByPropertyIdAndAvailability(property.get(), AvailabilityStatus.AVAILABLE);
+                List<Unit> units = unitRepository.findAllByPropertyAndAvailability(property.get(), AvailabilityStatus.AVAILABLE);
                 return ResponseEntity.status(HttpStatus.OK).body(units);
             }
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Property not found");
@@ -102,8 +102,8 @@ public class UnitService {
             if(property.isPresent()){
                 Optional<Unit> unit = unitRepository.findById(unitId);
                 if(unit.isPresent()){
-                    if(Objects.equals(property.get().getOwnerId().getId(), getCurrentUser().getId())){
-                        requestUnit.setPropertyId(property.get());
+                    if(Objects.equals(property.get().getOwner().getId(), getCurrentUser().getId())){
+                        requestUnit.setProperty(property.get());
                         unitRepository.save(requestUnit);
                         return ResponseEntity.status(HttpStatus.OK).body("Unit updated successfully");
                     }

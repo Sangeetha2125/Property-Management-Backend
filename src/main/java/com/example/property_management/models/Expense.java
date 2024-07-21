@@ -24,7 +24,7 @@ public class Expense {
 
     @ManyToOne
     @JoinColumn(name = "unit_id")
-    private Unit unitId;
+    private Unit unit;
 
     @Column(name = "amount")
     private Integer amount;
@@ -36,7 +36,7 @@ public class Expense {
     private String description;
 
     @Column(name = "expense_date")
-    @JsonFormat(pattern = "dd-mm-yyyy")
+    @JsonFormat(pattern = "dd-MM-yyyy")
     @Temporal(TemporalType.DATE)
     private Date expenseDate;
 }

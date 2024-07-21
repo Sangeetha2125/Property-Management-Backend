@@ -52,8 +52,8 @@ public class UnitAvailabilityService {
                 }
                 Optional<Unit> unit = unitRepository.findById(unitId);
                 if(unit.isPresent()){
-                    if(Objects.equals(unit.get().getPropertyId().getOwnerId().getId(), getCurrentUser().getId())){
-                        unitAvailability.setUnitId(unit.get());
+                    if(Objects.equals(unit.get().getProperty().getOwner().getId(), getCurrentUser().getId())){
+                        unitAvailability.setUnit(unit.get());
                         unitAvailabilityRepository.save(unitAvailability);
                         unit.get().setAvailability(AvailabilityStatus.AVAILABLE);
                         unitRepository.save(unit.get());
@@ -72,7 +72,7 @@ public class UnitAvailabilityService {
         if(isAuthenticated()){
             Optional<Unit> unit = unitRepository.findById(unitId);
             if(unit.isPresent()){
-                List<UnitAvailability> unitAvailabilities = unitAvailabilityRepository.findAllByUnitId(unit.get());
+                List<UnitAvailability> unitAvailabilities = unitAvailabilityRepository.findAllByUnit(unit.get());
                 return ResponseEntity.status(HttpStatus.OK).body(unitAvailabilities);
             }
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Unit not found");
@@ -88,11 +88,11 @@ public class UnitAvailabilityService {
                 }
                 Optional<Unit> unit = unitRepository.findById(unitId);
                 if(unit.isPresent()){
-                    if(Objects.equals(unit.get().getPropertyId().getOwnerId().getId(), getCurrentUser().getId())){
+                    if(Objects.equals(unit.get().getProperty().getOwner().getId(), getCurrentUser().getId())){
                         Optional<UnitAvailability> existingUnitAvailability = unitAvailabilityRepository.findById(unitAvailability.getId());
                         if(existingUnitAvailability.isPresent()){
                             if(existingUnitAvailability.get().getAvailabilityType().equals(unitAvailability.getAvailabilityType())){
-                                unitAvailability.setUnitId(unit.get());
+                                unitAvailability.setUnit(unit.get());
                                 unitAvailabilityRepository.save(unitAvailability);
 //                                Trigger to update current agreement and create new agreement line item as the amount changes
                                 return ResponseEntity.status(HttpStatus.CREATED).body("Unit availability updated successfully");
@@ -114,9 +114,9 @@ public class UnitAvailabilityService {
         if(isAuthenticated() && isOwner()) {
             Optional<Unit> unit = unitRepository.findById(unitId);
             if (unit.isPresent()) {
-                if (Objects.equals(unit.get().getPropertyId().getOwnerId().getId(), getCurrentUser().getId())) {
+                if (Objects.equals(unit.get().getProperty().getOwner().getId(), getCurrentUser().getId())) {
                     unitAvailabilityRepository.deleteById(id);
-                    if(unitAvailabilityRepository.findAllByUnitId(unit.get()).isEmpty()){
+                    if(unitAvailabilityRepository.findAllByUnit(unit.get()).isEmpty()){
                         unit.get().setAvailability(AvailabilityStatus.UNAVAILABLE);
                         unitRepository.save(unit.get());
                     }
