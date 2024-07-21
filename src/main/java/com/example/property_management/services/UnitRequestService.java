@@ -2,8 +2,10 @@ package com.example.property_management.services;
 
 import com.example.property_management.enums.UnitRequestStatus;
 import com.example.property_management.models.Unit;
+import com.example.property_management.models.UnitAvailability;
 import com.example.property_management.models.UnitRequest;
 import com.example.property_management.models.User;
+import com.example.property_management.repositories.UnitAvailabilityRepository;
 import com.example.property_management.repositories.UnitRepository;
 import com.example.property_management.repositories.UnitRequestRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +28,9 @@ public class UnitRequestService {
     @Autowired
     private UnitRequestRepository unitRequestRepository;
 
+    @Autowired
+    private UnitAvailabilityRepository unitAvailabilityRepository;
+
     private boolean isAuthenticated(){
         Authentication authContext = SecurityContextHolder.getContext().getAuthentication();
         return authContext!=null && authContext.isAuthenticated();
@@ -42,19 +47,24 @@ public class UnitRequestService {
         return (User) authContext.getPrincipal();
     }
 
-    public ResponseEntity<Object> raiseRequest(UnitRequest unitRequest, BigInteger unitId){
+    public ResponseEntity<Object> raiseRequest(UnitRequest unitRequest,BigInteger availabilityId){
         if(isAuthenticated() && !isOwner()){
-            Optional<Unit> unit = unitRepository.findById(unitId);
-            if(unit.isPresent()){
-                if(unitRequest.getType()!=null && unitRequest.getMessage()!=null){
+            Optional<UnitAvailability> unitAvailability = unitAvailabilityRepository.findById(availabilityId);
+            if(unitAvailability.isPresent() ){
+                Unit unit = unitRepository.findById(unitAvailability.get().getUnit().getId()).get();
+                if(unitRequest.getMessage()!=null){
+                    unitRequest.setAmount(unitAvailability.get().getAmount());
+                    unitRequest.setSecurityDeposit(unitAvailability.get().getSecurityDeposit());
+                    unitRequest.setMonthlyDue(unitAvailability.get().getMonthlyDue());
                     unitRequest.setUser(getCurrentUser());
-                    unitRequest.setUnit(unit.get());
+                    unitRequest.setUnit(unit);
+                    unitRequest.setType(unitAvailability.get().getAvailabilityType());
                     unitRequestRepository.save(unitRequest);
                     return ResponseEntity.status(HttpStatus.CREATED).body("Request created successfully");
                 }
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Fields can't be empty");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Request message can't be empty");
             }
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Unit not found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Unit Availability not found");
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized to access this route");
     }
@@ -64,15 +74,12 @@ public class UnitRequestService {
             Optional<UnitRequest> unitRequest = unitRequestRepository.findById(requestId);
             if(unitRequest.isPresent()){
                if(Objects.equals(getCurrentUser().getId(), unitRequest.get().getUnit().getProperty().getOwner().getId())){
-                   if(unitRequest.get().getStatus()!= UnitRequestStatus.PENDING && unitRequestStatus!=UnitRequestStatus.PENDING){
+                   if(unitRequest.get().getStatus() == UnitRequestStatus.PENDING && unitRequestStatus!=UnitRequestStatus.PENDING){
                        unitRequest.get().setStatus(unitRequestStatus);
-                       if(unitRequest.get().getStatus()==UnitRequestStatus.ACCEPTED){
-//                           Create a new agreement
-                       }
                        unitRequestRepository.save(unitRequest.get());
                        return ResponseEntity.status(HttpStatus.OK).body("Request responded successfully");
                    }
-                   return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Fields can't be empty");
+                   return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
                }
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized to access this route");
             }
@@ -106,12 +113,27 @@ public class UnitRequestService {
             Optional<UnitRequest> unitRequest = unitRequestRepository.findById(requestId);
             if(unitRequest.isPresent()){
                 if(Objects.equals(getCurrentUser().getId(), unitRequest.get().getUser().getId())){
-                    unitRequestRepository.deleteById(requestId);
-                    return ResponseEntity.status(HttpStatus.OK).body("Unit request deleted successfully");
+                    if(unitRequest.get().getStatus()==UnitRequestStatus.PENDING){
+                        unitRequestRepository.deleteById(requestId);
+                        return ResponseEntity.status(HttpStatus.OK).body("Unit request deleted successfully");
+                    }
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
                 }
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized to access this route");
             }
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Request not found");
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized to access this route");
+    }
+
+    public ResponseEntity<Object> getAllRequests() {
+        if(isAuthenticated()){
+            if(isOwner()){
+                List<UnitRequest> unitRequests = unitRequestRepository.findAllByOwner(getCurrentUser().getId().intValue());
+                return ResponseEntity.status(HttpStatus.OK).body(unitRequests);
+            }
+            List<UnitRequest> unitRequests = unitRequestRepository.findAllByUser(getCurrentUser());
+            return ResponseEntity.status(HttpStatus.OK).body(unitRequests);
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized to access this route");
     }

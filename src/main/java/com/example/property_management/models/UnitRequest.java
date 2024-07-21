@@ -39,6 +39,15 @@ public class UnitRequest {
     @Column(name = "message")
     private String message;
 
+    @Column(name = "monthly_due")
+    private Integer monthlyDue;
+
+    @Column(name = "amount")
+    private Integer amount;
+
+    @Column(name = "security_deposit")
+    private Integer securityDeposit;
+
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
     private UnitRequestStatus status;

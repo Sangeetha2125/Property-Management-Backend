@@ -36,15 +36,6 @@ public class Agreement {
     @Temporal(TemporalType.DATE)
     private Date endDate;
 
-    @Column(name = "monthly_due")
-    private Integer monthlyDue;
-
-    @Column(name = "amount")
-    private Integer amount;
-
-    @Column(name = "security_deposit")
-    private Integer securityDeposit;
-
     @Column(name = "number_of_years")
     private Integer numberOfYears;
 }

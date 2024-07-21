@@ -104,6 +104,7 @@ public class UnitService {
                 if(unit.isPresent()){
                     if(Objects.equals(property.get().getOwner().getId(), getCurrentUser().getId())){
                         requestUnit.setProperty(property.get());
+                        requestUnit.setAvailability(unit.get().getAvailability());
                         unitRepository.save(requestUnit);
                         return ResponseEntity.status(HttpStatus.OK).body("Unit updated successfully");
                     }

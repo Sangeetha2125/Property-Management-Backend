@@ -7,6 +7,7 @@ import com.example.property_management.models.UnitAvailability;
 import com.example.property_management.models.User;
 import com.example.property_management.repositories.UnitAvailabilityRepository;
 import com.example.property_management.repositories.UnitRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+@Slf4j
 @Service
 public class UnitAvailabilityService {
 
@@ -44,16 +46,22 @@ public class UnitAvailabilityService {
         return (User) authContext.getPrincipal();
     }
 
-    public ResponseEntity<Object> setUnitAvailabilities(UnitAvailability unitAvailability, BigInteger unitId){
+    public ResponseEntity<Object> setUnitAvailability(UnitAvailability unitAvailability, BigInteger unitId){
         if(isAuthenticated() && isOwner()){
             if(unitAvailability.getAvailabilityType()!=null && unitAvailability.getAmount()!=0){
-                if(unitAvailability.getAvailabilityType() == UnitType.RENT && unitAvailability.getMonthlyDue()!=null) {
+                if(unitAvailability.getAvailabilityType() == UnitType.RENT && unitAvailability.getMonthlyDue() == null) {
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Monthly due date is required");
                 }
                 Optional<Unit> unit = unitRepository.findById(unitId);
                 if(unit.isPresent()){
                     if(Objects.equals(unit.get().getProperty().getOwner().getId(), getCurrentUser().getId())){
                         unitAvailability.setUnit(unit.get());
+                        if(unitAvailability.getAvailabilityType()!=UnitType.RENT){
+                            unitAvailability.setMonthlyDue(null);
+                        }
+                        if(unitAvailability.getAvailabilityType()==UnitType.BUY){
+                            unitAvailability.setSecurityDeposit(null);
+                        }
                         unitAvailabilityRepository.save(unitAvailability);
                         unit.get().setAvailability(AvailabilityStatus.AVAILABLE);
                         unitRepository.save(unit.get());
@@ -83,7 +91,7 @@ public class UnitAvailabilityService {
     public ResponseEntity<Object> updateUnitAvailability(UnitAvailability unitAvailability, BigInteger unitId){
         if(isAuthenticated() && isOwner()){
             if(unitAvailability.getAvailabilityType()!=null && unitAvailability.getAmount()!=0){
-                if(unitAvailability.getAvailabilityType() == UnitType.RENT && unitAvailability.getMonthlyDue()!=null) {
+                if(unitAvailability.getAvailabilityType() == UnitType.RENT && unitAvailability.getMonthlyDue()==null) {
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Monthly due date is required");
                 }
                 Optional<Unit> unit = unitRepository.findById(unitId);
