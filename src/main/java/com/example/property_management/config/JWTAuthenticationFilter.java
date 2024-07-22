@@ -37,6 +37,10 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
             filterChain.doFilter(request,response);
             return;
         }
+        if(authHeader.equals("Bearer null")){
+            filterChain.doFilter(request,response);
+            return;
+        }
         jwt = authHeader.substring(7);
         userEmail = jwtService.extractUserName(jwt);
         if(userEmail!=null && SecurityContextHolder.getContext().getAuthentication()==null){

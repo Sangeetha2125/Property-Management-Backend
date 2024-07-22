@@ -1,6 +1,5 @@
 package com.example.property_management.controllers;
 
-import com.example.property_management.enums.UnitRequestStatus;
 import com.example.property_management.models.UnitRequest;
 import com.example.property_management.models.UnitResponseToRequest;
 import com.example.property_management.services.UnitRequestService;
@@ -43,8 +42,8 @@ public class UnitRequestController {
     }
 
     @SneakyThrows
-    @DeleteMapping("/{requestId}")
-    public ResponseEntity<Object> deleteRequestById(@PathVariable BigInteger requestId){
-        return unitRequestService.deleteRequestById(requestId);
+    @PostMapping("/cancel/{requestId}")
+    public ResponseEntity<Object> cancelRequest(@PathVariable BigInteger requestId){
+        return unitRequestService.cancelRequest(requestId);
     }
 }

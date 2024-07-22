@@ -72,27 +72,25 @@ public class AgreementService {
     }
 
     public ResponseEntity<Object> createAgreement(Agreement agreement, BigInteger requestId) {
-        if(isAuthenticated() && isNotOwner()){
+        if (isAuthenticated() && isNotOwner()) {
             Optional<UnitRequest> unitRequest = unitRequestRepository.findById(requestId);
-            if(unitRequest.isPresent()){
+            if (unitRequest.isPresent()) {
                 Unit unit = unitRepository.findById(unitRequest.get().getUnit().getId()).get();
-                if(Objects.equals(unitRequest.get().getUser().getId(), getCurrentUser().getId())){
-                    if(unitRequest.get().getStatus()==UnitRequestStatus.PENDING){
-                        if(unitRequest.get().getType()==UnitType.RENT && agreement.getStartDate()!=null && agreement.getEndDate()!=null){
+                if (Objects.equals(unitRequest.get().getUser().getId(), getCurrentUser().getId())) {
+                    if (unitRequest.get().getStatus() == UnitRequestStatus.PENDING) {
+                        if (unitRequest.get().getType() == UnitType.RENT && agreement.getStartDate() != null && agreement.getEndDate() != null) {
                             Agreement createRentalAgreement = getRentalAgreement(agreement, unitRequest.get());
                             agreementRepository.save(createRentalAgreement);
                             unit.setAvailability(AvailabilityStatus.OCCUPIED);
                             unitRepository.save(unit);
                             return ResponseEntity.status(HttpStatus.OK).body("Rental agreement created successfully");
-                        }
-                        else if(unitRequest.get().getType()==UnitType.LEASE && agreement.getNumberOfYears()!=null){
+                        } else if (unitRequest.get().getType() == UnitType.LEASE && agreement.getNumberOfYears() != null) {
                             Agreement createLeaseAgreement = getLeaseAgreement(agreement, unitRequest.get());
                             agreementRepository.save(createLeaseAgreement);
                             unit.setAvailability(AvailabilityStatus.OCCUPIED);
                             unitRepository.save(unit);
                             return ResponseEntity.status(HttpStatus.OK).body("Lease agreement created successfully");
-                        }
-                        else if(unitRequest.get().getType()==UnitType.BUY){
+                        } else if (unitRequest.get().getType() == UnitType.BUY) {
                             Agreement createBuyAgreement = getBuyAgreement(agreement, unitRequest.get());
                             agreementRepository.save(createBuyAgreement);
                             unit.setAvailability(AvailabilityStatus.SOLD_OUT);
@@ -102,25 +100,6 @@ public class AgreementService {
                         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Fields can't be empty");
                     }
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Bad request!, Can't create agreement");
-                }
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized to access this route");
-            }
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Request not found");
-        }
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized to access this route");
-    }
-
-    public ResponseEntity<Object> cancelAgreement(BigInteger requestId) {
-        if(isAuthenticated() && isNotOwner()){
-            Optional<UnitRequest> unitRequest = unitRequestRepository.findById(requestId);
-            if(unitRequest.isPresent()){
-                if(Objects.equals(unitRequest.get().getUser().getId(), getCurrentUser().getId())){
-                    if(unitRequest.get().getStatus()==UnitRequestStatus.PENDING){
-                        unitRequest.get().setStatus(UnitRequestStatus.DENIED_BY_USER);
-                        unitRequestRepository.save(unitRequest.get());
-                        return ResponseEntity.status(HttpStatus.OK).body("Agreement cancelled successfully");
-                    }
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Bad request!, Can't cancel agreement");
                 }
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized to access this route");
             }

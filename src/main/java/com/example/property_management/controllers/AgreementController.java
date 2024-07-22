@@ -22,12 +22,6 @@ public class AgreementController {
         return agreementService.createAgreement(agreement,requestId);
     }
 
-    @SneakyThrows
-    @PostMapping("/cancel/{requestId}")
-    public ResponseEntity<Object> cancelAgreement(@PathVariable BigInteger requestId){
-        return agreementService.cancelAgreement(requestId);
-    }
-
 //    Yet to implement -- also see whether a user is already having an agreement with some other house if possible, when creating an agreement
     @SneakyThrows
     @GetMapping("/current")

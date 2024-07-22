@@ -108,24 +108,6 @@ public class UnitRequestService {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized to access this route");
     }
 
-    public ResponseEntity<Object> deleteRequestById(BigInteger requestId){
-        if(isAuthenticated() && !isOwner()){
-            Optional<UnitRequest> unitRequest = unitRequestRepository.findById(requestId);
-            if(unitRequest.isPresent()){
-                if(Objects.equals(getCurrentUser().getId(), unitRequest.get().getUser().getId())){
-                    if(unitRequest.get().getStatus()==UnitRequestStatus.PENDING){
-                        unitRequestRepository.deleteById(requestId);
-                        return ResponseEntity.status(HttpStatus.OK).body("Unit request deleted successfully");
-                    }
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-                }
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized to access this route");
-            }
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Request not found");
-        }
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized to access this route");
-    }
-
     public ResponseEntity<Object> getAllRequests() {
         if(isAuthenticated()){
             if(isOwner()){
@@ -134,6 +116,26 @@ public class UnitRequestService {
             }
             List<UnitRequest> unitRequests = unitRequestRepository.findAllByUser(getCurrentUser());
             return ResponseEntity.status(HttpStatus.OK).body(unitRequests);
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized to access this route");
+    }
+
+
+    public ResponseEntity<Object> cancelRequest(BigInteger requestId) {
+        if(isAuthenticated() && !isOwner()){
+            Optional<UnitRequest> unitRequest = unitRequestRepository.findById(requestId);
+            if(unitRequest.isPresent()){
+                if(Objects.equals(unitRequest.get().getUser().getId(), getCurrentUser().getId())){
+                    if(unitRequest.get().getStatus()==UnitRequestStatus.PENDING){
+                        unitRequest.get().setStatus(UnitRequestStatus.DENIED_BY_USER);
+                        unitRequestRepository.save(unitRequest.get());
+                        return ResponseEntity.status(HttpStatus.OK).body("Request cancelled successfully");
+                    }
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Bad request!, Can't cancel agreement");
+                }
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized to access this route");
+            }
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Request not found");
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized to access this route");
     }
