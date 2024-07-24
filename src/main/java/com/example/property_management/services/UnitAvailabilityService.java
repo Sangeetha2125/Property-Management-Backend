@@ -52,6 +52,9 @@ public class UnitAvailabilityService {
                 if(unitAvailability.getAvailabilityType() == UnitType.RENT && unitAvailability.getMonthlyDue() == null) {
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Monthly due date is required");
                 }
+                if(unitAvailability.getAvailabilityType()!=UnitType.BUY && unitAvailability.getNoOfMonths() == null){
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Number of months is required");
+                }
                 Optional<Unit> unit = unitRepository.findById(unitId);
                 if(unit.isPresent()){
                     if(Objects.equals(unit.get().getProperty().getOwner().getId(), getCurrentUser().getId())){
@@ -60,6 +63,7 @@ public class UnitAvailabilityService {
                             unitAvailability.setMonthlyDue(null);
                         }
                         if(unitAvailability.getAvailabilityType()==UnitType.BUY){
+                            unitAvailability.setNoOfMonths(null);
                             unitAvailability.setSecurityDeposit(null);
                         }
                         unitAvailabilityRepository.save(unitAvailability);
@@ -94,6 +98,9 @@ public class UnitAvailabilityService {
                 if(unitAvailability.getAvailabilityType() == UnitType.RENT && unitAvailability.getMonthlyDue()==null) {
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Monthly due date is required");
                 }
+                if(unitAvailability.getAvailabilityType()!=UnitType.BUY && unitAvailability.getNoOfMonths() == null){
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Number of months is required");
+                }
                 Optional<Unit> unit = unitRepository.findById(unitId);
                 if(unit.isPresent()){
                     if(Objects.equals(unit.get().getProperty().getOwner().getId(), getCurrentUser().getId())){
@@ -101,9 +108,16 @@ public class UnitAvailabilityService {
                         if(existingUnitAvailability.isPresent()){
                             if(existingUnitAvailability.get().getAvailabilityType().equals(unitAvailability.getAvailabilityType())){
                                 unitAvailability.setUnit(unit.get());
+                                if(unitAvailability.getAvailabilityType()!=UnitType.RENT){
+                                    unitAvailability.setMonthlyDue(null);
+                                }
+                                if(unitAvailability.getAvailabilityType()==UnitType.BUY){
+                                    unitAvailability.setNoOfMonths(null);
+                                    unitAvailability.setSecurityDeposit(null);
+                                }
                                 unitAvailabilityRepository.save(unitAvailability);
-//                                Trigger to update current agreement and create new agreement line item as the amount changes
-                                return ResponseEntity.status(HttpStatus.CREATED).body("Unit availability updated successfully");
+//                              Trigger to update current agreement and create new agreement line item as the amount changes
+                                return ResponseEntity.status(HttpStatus.OK).body("Unit availability updated successfully");
                             }
                             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Unit availability type can't be changed");
                         }

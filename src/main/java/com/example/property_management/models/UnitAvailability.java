@@ -38,5 +38,8 @@ public class UnitAvailability {
     @Column(name = "monthly_due")
     private Integer monthlyDue;
 
+    @Column(name = "no_of_months")
+    private Integer noOfMonths;
+
 //    Document upload url
 }

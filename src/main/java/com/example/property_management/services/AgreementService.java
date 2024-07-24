@@ -53,7 +53,6 @@ public class AgreementService {
     private static Agreement getRentalAgreement(Agreement agreement, UnitRequest unitRequest) {
         Agreement rentalAgreement = new Agreement();
         rentalAgreement.setStartDate(agreement.getStartDate());
-        rentalAgreement.setEndDate(agreement.getEndDate());
         rentalAgreement.setRequest(unitRequest);
         return rentalAgreement;
     }
@@ -61,6 +60,7 @@ public class AgreementService {
     private static Agreement getLeaseAgreement(Agreement agreement, UnitRequest unitRequest) {
         Agreement leaseAgreement = new Agreement();
         leaseAgreement.setRequest(unitRequest);
+        leaseAgreement.setStartDate(agreement.getStartDate());
         leaseAgreement.setNumberOfYears(agreement.getNumberOfYears());
         return leaseAgreement;
     }
@@ -78,13 +78,13 @@ public class AgreementService {
                 Unit unit = unitRepository.findById(unitRequest.get().getUnit().getId()).get();
                 if (Objects.equals(unitRequest.get().getUser().getId(), getCurrentUser().getId())) {
                     if (unitRequest.get().getStatus() == UnitRequestStatus.PENDING) {
-                        if (unitRequest.get().getType() == UnitType.RENT && agreement.getStartDate() != null && agreement.getEndDate() != null) {
+                        if (unitRequest.get().getType() == UnitType.RENT && agreement.getStartDate() != null) {
                             Agreement createRentalAgreement = getRentalAgreement(agreement, unitRequest.get());
                             agreementRepository.save(createRentalAgreement);
                             unit.setAvailability(AvailabilityStatus.OCCUPIED);
                             unitRepository.save(unit);
                             return ResponseEntity.status(HttpStatus.OK).body("Rental agreement created successfully");
-                        } else if (unitRequest.get().getType() == UnitType.LEASE && agreement.getNumberOfYears() != null) {
+                        } else if (unitRequest.get().getType() == UnitType.LEASE && agreement.getStartDate() != null && agreement.getNumberOfYears() != null) {
                             Agreement createLeaseAgreement = getLeaseAgreement(agreement, unitRequest.get());
                             agreementRepository.save(createLeaseAgreement);
                             unit.setAvailability(AvailabilityStatus.OCCUPIED);

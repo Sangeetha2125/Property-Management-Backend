@@ -52,6 +52,9 @@ public class UnitRequest {
     @Enumerated(EnumType.STRING)
     private UnitRequestStatus status;
 
+    @Column(name = "no_of_months")
+    private Integer noOfMonths;
+
     @JsonFormat(pattern = "dd-MM-yyyy hh:")
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "request_date")
