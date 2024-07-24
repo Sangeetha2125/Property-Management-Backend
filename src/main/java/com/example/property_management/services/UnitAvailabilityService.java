@@ -46,6 +46,12 @@ public class UnitAvailabilityService {
         return (User) authContext.getPrincipal();
     }
 
+    private boolean isBuyer(){
+        Authentication authContext = SecurityContextHolder.getContext().getAuthentication();
+        User authenticatedUser = (User) authContext.getPrincipal();
+        return authenticatedUser.getRole().name().equals("BUYER");
+    }
+
     public ResponseEntity<Object> setUnitAvailability(UnitAvailability unitAvailability, BigInteger unitId){
         if(isAuthenticated() && isOwner()){
             if(unitAvailability.getAvailabilityType()!=null && unitAvailability.getAmount()!=0){
@@ -84,7 +90,11 @@ public class UnitAvailabilityService {
         if(isAuthenticated()){
             Optional<Unit> unit = unitRepository.findById(unitId);
             if(unit.isPresent()){
-                List<UnitAvailability> unitAvailabilities = unitAvailabilityRepository.findAllByUnit(unit.get());
+                if(isBuyer()){
+                    List<UnitAvailability> unitAvailabilities = unitAvailabilityRepository.findAllByUnitAndAvailabilityType(unit.get(),UnitType.BUY);
+                    return ResponseEntity.status(HttpStatus.OK).body(unitAvailabilities);
+                }
+                List<UnitAvailability> unitAvailabilities = unitAvailabilityRepository.findAllByUnitAndAvailabilityTypeNot(unit.get(),UnitType.BUY);
                 return ResponseEntity.status(HttpStatus.OK).body(unitAvailabilities);
             }
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Unit not found");
@@ -116,7 +126,7 @@ public class UnitAvailabilityService {
                                     unitAvailability.setSecurityDeposit(null);
                                 }
                                 unitAvailabilityRepository.save(unitAvailability);
-//                              Trigger to update current agreement and create new agreement line item as the amount changes
+//                              Trigger to update current agreement and create new agreement line item as the amount changes --> future enhancements
                                 return ResponseEntity.status(HttpStatus.OK).body("Unit availability updated successfully");
                             }
                             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Unit availability type can't be changed");

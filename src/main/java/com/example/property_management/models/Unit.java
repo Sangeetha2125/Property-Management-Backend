@@ -46,4 +46,8 @@ public class Unit {
 
     @Column(name = "description")
     private String description;
+
+    @OneToOne
+    @JoinColumn(name = "sold_to")
+    private User soldTo;
 }

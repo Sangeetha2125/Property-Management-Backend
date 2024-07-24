@@ -22,7 +22,6 @@ public class AgreementController {
         return agreementService.createAgreement(agreement,requestId);
     }
 
-//    Yet to implement -- also see whether a user is already having an agreement with some other house if possible, when creating an agreement
     @SneakyThrows
     @GetMapping("/current")
     public ResponseEntity<Object> getCurrentAgreement(){

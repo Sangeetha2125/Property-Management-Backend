@@ -2,8 +2,10 @@ package com.example.property_management.services;
 
 
 import com.example.property_management.enums.AvailabilityStatus;
+import com.example.property_management.enums.UnitType;
 import com.example.property_management.models.*;
 import com.example.property_management.repositories.PropertyRepository;
+import com.example.property_management.repositories.UnitAvailabilityRepository;
 import com.example.property_management.repositories.UnitRepository;
 import com.example.property_management.repositories.UnitRequestRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +17,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -31,6 +34,9 @@ public class UnitService {
     @Autowired
     private UnitRequestRepository unitRequestRepository;
 
+    @Autowired
+    private UnitAvailabilityRepository unitAvailabilityRepository;
+
     private boolean isAuthenticated(){
         Authentication authContext = SecurityContextHolder.getContext().getAuthentication();
         return authContext!=null && authContext.isAuthenticated();
@@ -40,6 +46,12 @@ public class UnitService {
         Authentication authContext = SecurityContextHolder.getContext().getAuthentication();
         User authenticatedUser = (User) authContext.getPrincipal();
         return authenticatedUser.getRole().name().equals("OWNER");
+    }
+
+    private boolean isBuyer(){
+        Authentication authContext = SecurityContextHolder.getContext().getAuthentication();
+        User authenticatedUser = (User) authContext.getPrincipal();
+        return authenticatedUser.getRole().name().equals("BUYER");
     }
 
     private User getCurrentUser(){
@@ -72,8 +84,35 @@ public class UnitService {
                     }
                     return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized to access this route");
                 }
-                List<Unit> units = unitRepository.findAllByPropertyAndAvailability(property.get(), AvailabilityStatus.AVAILABLE);
-                return ResponseEntity.status(HttpStatus.OK).body(units);
+                if(isBuyer()){
+                    List<Unit> unitsToBuy = new ArrayList<>();
+                    for(Unit unit:unitRepository.findAllByPropertyAndAvailability(property.get(), AvailabilityStatus.AVAILABLE)){
+                        List<UnitAvailability> unitAvailabilities = unitAvailabilityRepository.findAllByUnitAndAvailabilityType(unit, UnitType.BUY);
+                        if(unitAvailabilities.size()==1){
+                            unitsToBuy.add(unit);
+                        }
+                    }
+                    return ResponseEntity.status(HttpStatus.OK).body(unitsToBuy);
+                }
+                List<Unit> unitsToRentOrLease = new ArrayList<>();
+                for(Unit unit:unitRepository.findAllByPropertyAndAvailability(property.get(), AvailabilityStatus.AVAILABLE)){
+                    List<UnitAvailability> unitAvailabilities = unitAvailabilityRepository.findAllByUnitAndAvailabilityTypeNot(unit, UnitType.BUY);
+                    if(!unitAvailabilities.isEmpty()){
+                        unitsToRentOrLease.add(unit);
+                    }
+                }
+                return ResponseEntity.status(HttpStatus.OK).body(unitsToRentOrLease);
+            }
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Property not found");
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized to access this route");
+    }
+
+    public ResponseEntity<Object> getUnitById(BigInteger unitId){
+        if(isAuthenticated()){
+            Optional<Unit> unit = unitRepository.findById(unitId);
+            if(unit.isPresent()){
+                return ResponseEntity.status(HttpStatus.OK).body(unit);
             }
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Property not found");
         }

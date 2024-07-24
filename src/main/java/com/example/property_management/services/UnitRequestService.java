@@ -1,6 +1,7 @@
 package com.example.property_management.services;
 
 import com.example.property_management.enums.UnitRequestStatus;
+import com.example.property_management.enums.UnitType;
 import com.example.property_management.models.Unit;
 import com.example.property_management.models.UnitAvailability;
 import com.example.property_management.models.UnitRequest;
@@ -42,6 +43,12 @@ public class UnitRequestService {
         return authenticatedUser.getRole().name().equals("OWNER");
     }
 
+    private boolean isBuyer(){
+        Authentication authContext = SecurityContextHolder.getContext().getAuthentication();
+        User authenticatedUser = (User) authContext.getPrincipal();
+        return authenticatedUser.getRole().name().equals("BUYER");
+    }
+
     private User getCurrentUser(){
         Authentication authContext = SecurityContextHolder.getContext().getAuthentication();
         return (User) authContext.getPrincipal();
@@ -50,19 +57,22 @@ public class UnitRequestService {
     public ResponseEntity<Object> raiseRequest(UnitRequest unitRequest,BigInteger availabilityId){
         if(isAuthenticated() && !isOwner()){
             Optional<UnitAvailability> unitAvailability = unitAvailabilityRepository.findById(availabilityId);
-            if(unitAvailability.isPresent() ){
-                Unit unit = unitRepository.findById(unitAvailability.get().getUnit().getId()).get();
-                if(unitRequest.getMessage()!=null){
-                    unitRequest.setAmount(unitAvailability.get().getAmount());
-                    unitRequest.setSecurityDeposit(unitAvailability.get().getSecurityDeposit());
-                    unitRequest.setMonthlyDue(unitAvailability.get().getMonthlyDue());
-                    unitRequest.setUser(getCurrentUser());
-                    unitRequest.setUnit(unit);
-                    unitRequest.setType(unitAvailability.get().getAvailabilityType());
-                    unitRequestRepository.save(unitRequest);
-                    return ResponseEntity.status(HttpStatus.CREATED).body("Request created successfully");
+            if(unitAvailability.isPresent()){
+                if(unitAvailability.get().getAvailabilityType()!=UnitType.BUY && isBuyer()){
+                    Unit unit = unitRepository.findById(unitAvailability.get().getUnit().getId()).get();
+                    if(unitRequest.getMessage()!=null){
+                        unitRequest.setAmount(unitAvailability.get().getAmount());
+                        unitRequest.setSecurityDeposit(unitAvailability.get().getSecurityDeposit());
+                        unitRequest.setMonthlyDue(unitAvailability.get().getMonthlyDue());
+                        unitRequest.setUser(getCurrentUser());
+                        unitRequest.setUnit(unit);
+                        unitRequest.setType(unitAvailability.get().getAvailabilityType());
+                        unitRequestRepository.save(unitRequest);
+                        return ResponseEntity.status(HttpStatus.CREATED).body("Request created successfully");
+                    }
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Request message can't be empty");
                 }
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Request message can't be empty");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized to access this route");
             }
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Unit Availability not found");
         }
