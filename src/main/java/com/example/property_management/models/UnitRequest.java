@@ -2,7 +2,6 @@ package com.example.property_management.models;
 
 import com.example.property_management.enums.UnitRequestStatus;
 import com.example.property_management.enums.UnitType;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -55,7 +54,6 @@ public class UnitRequest {
     @Column(name = "no_of_months")
     private Integer noOfMonths;
 
-    @JsonFormat(pattern = "dd-MM-yyyy hh:")
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "request_date")
     private Date requestDate;

@@ -1,7 +1,6 @@
 package com.example.property_management.models;
 
 import com.example.property_management.enums.UserRole;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -42,7 +41,6 @@ public class User implements UserDetails {
     private String password;
 
     @Column(name = "created_at", nullable = false)
-    @JsonFormat(pattern = "dd-MM-yyyy hh:")
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt;
 

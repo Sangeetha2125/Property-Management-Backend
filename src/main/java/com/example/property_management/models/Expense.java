@@ -1,6 +1,5 @@
 package com.example.property_management.models;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -36,7 +35,6 @@ public class Expense {
     private String description;
 
     @Column(name = "expense_date")
-    @JsonFormat(pattern = "dd-MM-yyyy")
     @Temporal(TemporalType.DATE)
     private Date expenseDate;
 }

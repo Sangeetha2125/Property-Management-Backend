@@ -2,7 +2,6 @@ package com.example.property_management.models;
 
 import com.example.property_management.enums.PaymentMethod;
 import com.example.property_management.enums.PaymentStatus;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -29,7 +28,6 @@ public class Transaction {
     private Agreement agreement;
 
     @Column(name = "transaction_time")
-    @JsonFormat(pattern = "dd-MM-yyyy hh:")
     @Temporal(TemporalType.TIMESTAMP)
     private Date transactionTime;
 

@@ -90,6 +90,10 @@ public class UnitAvailabilityService {
         if(isAuthenticated()){
             Optional<Unit> unit = unitRepository.findById(unitId);
             if(unit.isPresent()){
+                if(isOwner()){
+                    List<UnitAvailability> unitAvailabilities = unitAvailabilityRepository.findAllByUnit(unit.get());
+                    return ResponseEntity.status(HttpStatus.OK).body(unitAvailabilities);
+                }
                 if(isBuyer()){
                     List<UnitAvailability> unitAvailabilities = unitAvailabilityRepository.findAllByUnitAndAvailabilityType(unit.get(),UnitType.BUY);
                     return ResponseEntity.status(HttpStatus.OK).body(unitAvailabilities);

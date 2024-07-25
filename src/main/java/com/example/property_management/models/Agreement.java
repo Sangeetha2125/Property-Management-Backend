@@ -1,6 +1,5 @@
 package com.example.property_management.models;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -27,12 +26,10 @@ public class Agreement {
     private UnitRequest request;
 
     @Column(name = "start_date")
-    @JsonFormat(pattern = "dd-MM-yyyy")
     @Temporal(TemporalType.DATE)
     private Date startDate;
 
     @Column(name = "end_date")
-    @JsonFormat(pattern = "dd-MM-yyyy")
     @Temporal(TemporalType.DATE)
     private Date endDate;
 

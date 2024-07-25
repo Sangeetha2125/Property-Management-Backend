@@ -58,7 +58,7 @@ public class UnitRequestService {
         if(isAuthenticated() && !isOwner()){
             Optional<UnitAvailability> unitAvailability = unitAvailabilityRepository.findById(availabilityId);
             if(unitAvailability.isPresent()){
-                if(unitAvailability.get().getAvailabilityType()!=UnitType.BUY && isBuyer()){
+                if(!((unitAvailability.get().getAvailabilityType()==UnitType.BUY && !isBuyer())||(unitAvailability.get().getAvailabilityType()!=UnitType.BUY && isBuyer()))){
                     Unit unit = unitRepository.findById(unitAvailability.get().getUnit().getId()).get();
                     if(unitRequest.getMessage()!=null){
                         unitRequest.setAmount(unitAvailability.get().getAmount());
@@ -67,6 +67,7 @@ public class UnitRequestService {
                         unitRequest.setUser(getCurrentUser());
                         unitRequest.setUnit(unit);
                         unitRequest.setType(unitAvailability.get().getAvailabilityType());
+                        unitRequest.setNoOfMonths(unitAvailability.get().getNoOfMonths());
                         unitRequestRepository.save(unitRequest);
                         return ResponseEntity.status(HttpStatus.CREATED).body("Request created successfully");
                     }
