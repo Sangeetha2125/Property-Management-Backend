@@ -92,48 +92,51 @@ public class AgreementService {
         if (isAuthenticated() && isNotOwner()) {
             Optional<UnitRequest> unitRequest = unitRequestRepository.findById(requestId);
             if (unitRequest.isPresent()) {
-                Unit unit = unitRepository.findById(unitRequest.get().getUnit().getId()).get();
-                if (Objects.equals(unitRequest.get().getUser().getId(), getCurrentUser().getId())) {
-                    if(unit.getAvailability()==AvailabilityStatus.AVAILABLE){
-                        if (unitRequest.get().getStatus() == UnitRequestStatus.PENDING) {
-                            if (unitRequest.get().getType() == UnitType.RENT && agreement.getStartDate() != null) {
-                                Agreement currentAgreement = getLiveAgreement();
-                                if(currentAgreement!=null){
-                                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("End your current agreement to create new");
-                                }
-                                Agreement createRentalAgreement = getRentalAgreement(agreement, unitRequest.get());
-                                agreementRepository.save(createRentalAgreement);
-                                unit.setAvailability(AvailabilityStatus.OCCUPIED);
-                                unitRepository.save(unit);
-                                return ResponseEntity.status(HttpStatus.OK).body("Rental agreement created successfully");
-                            } else if (unitRequest.get().getType() == UnitType.LEASE && agreement.getStartDate() != null && agreement.getNumberOfYears() != null) {
-                                Agreement currentAgreement = getLiveAgreement();
-                                if(currentAgreement!=null){
-                                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("End your current agreement to create new");
-                                }
-                                Agreement createLeaseAgreement = getLeaseAgreement(agreement, unitRequest.get());
-                                agreementRepository.save(createLeaseAgreement);
-                                unit.setAvailability(AvailabilityStatus.OCCUPIED);
-                                unitRepository.save(unit);
-                                return ResponseEntity.status(HttpStatus.OK).body("Lease agreement created successfully");
-                            } else if (unitRequest.get().getType() == UnitType.BUY) {
-                                if(isBuyer()){
-                                    Agreement createBuyAgreement = getBuyAgreement(agreement, unitRequest.get());
-                                    agreementRepository.save(createBuyAgreement);
-                                    unit.setAvailability(AvailabilityStatus.SOLD_OUT);
-                                    unit.setSoldTo(getCurrentUser());
+                if(unitRequest.get().getStatus()==UnitRequestStatus.ACCEPTED){
+                    Unit unit = unitRepository.findById(unitRequest.get().getUnit().getId()).get();
+                    if (Objects.equals(unitRequest.get().getUser().getId(), getCurrentUser().getId())) {
+                        if(unit.getAvailability()==AvailabilityStatus.AVAILABLE){
+                            if (unitRequest.get().getStatus() == UnitRequestStatus.PENDING) {
+                                if (unitRequest.get().getType() == UnitType.RENT && agreement.getStartDate() != null) {
+                                    Agreement currentAgreement = getLiveAgreement();
+                                    if(currentAgreement!=null){
+                                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("End your current agreement to create new");
+                                    }
+                                    Agreement createRentalAgreement = getRentalAgreement(agreement, unitRequest.get());
+                                    agreementRepository.save(createRentalAgreement);
+                                    unit.setAvailability(AvailabilityStatus.OCCUPIED);
                                     unitRepository.save(unit);
-                                    return ResponseEntity.status(HttpStatus.OK).body("Unit bought successfully");
+                                    return ResponseEntity.status(HttpStatus.OK).body("Rental agreement created successfully");
+                                } else if (unitRequest.get().getType() == UnitType.LEASE && agreement.getStartDate() != null && agreement.getNumberOfYears() != null) {
+                                    Agreement currentAgreement = getLiveAgreement();
+                                    if(currentAgreement!=null){
+                                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("End your current agreement to create new");
+                                    }
+                                    Agreement createLeaseAgreement = getLeaseAgreement(agreement, unitRequest.get());
+                                    agreementRepository.save(createLeaseAgreement);
+                                    unit.setAvailability(AvailabilityStatus.OCCUPIED);
+                                    unitRepository.save(unit);
+                                    return ResponseEntity.status(HttpStatus.OK).body("Lease agreement created successfully");
+                                } else if (unitRequest.get().getType() == UnitType.BUY) {
+                                    if(isBuyer()){
+                                        Agreement createBuyAgreement = getBuyAgreement(agreement, unitRequest.get());
+                                        agreementRepository.save(createBuyAgreement);
+                                        unit.setAvailability(AvailabilityStatus.SOLD_OUT);
+                                        unit.setSoldTo(getCurrentUser());
+                                        unitRepository.save(unit);
+                                        return ResponseEntity.status(HttpStatus.OK).body("Unit bought successfully");
+                                    }
+                                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized to access this route");
                                 }
-                                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized to access this route");
+                                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Fields can't be empty");
                             }
-                            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Fields can't be empty");
+                            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Bad request!, Can't create agreement");
                         }
-                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Bad request!, Can't create agreement");
+                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Sorry! Unit is currently not available");
                     }
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Sorry! Unit is currently not available");
+                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized to access this route");
                 }
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized to access this route");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Can create agreement for only accepted requests");
             }
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Request not found");
         }
