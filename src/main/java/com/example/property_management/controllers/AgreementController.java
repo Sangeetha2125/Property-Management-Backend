@@ -27,4 +27,10 @@ public class AgreementController {
     public ResponseEntity<Object> getCurrentAgreement(){
         return agreementService.getCurrentAgreement();
     }
+
+    @SneakyThrows
+    @PostMapping("/terminate/{agreementId}")
+    public ResponseEntity<Object> terminateAgreement(@PathVariable BigInteger agreementId){
+        return agreementService.terminateAgreement(agreementId);
+    }
 }
