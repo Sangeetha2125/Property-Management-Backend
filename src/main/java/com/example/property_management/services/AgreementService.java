@@ -141,6 +141,9 @@ public class AgreementService {
                                 if(currentAgreement!=null){
                                     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("End your current agreement to create new");
                                 }
+                                if(unitRequest.get().getNoOfMonths()>agreement.getNumberOfYears()*12){
+                                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No of years should obey the minimum months criteria");
+                                }
                                 Agreement createLeaseAgreement = getLeaseAgreement(agreement, unitRequest.get());
                                 List<UnitRequest> currentUnitRequests = unitRequestRepository.getAllRequestsByUnit(unit.getId());
                                 for(UnitRequest liveUnitRequest:currentUnitRequests){
@@ -203,12 +206,12 @@ public class AgreementService {
                         log.info("No of Months: {}", monthsBetweenWithDayValue(agreement.get().getStartDate(), new Date()));
                         if(monthsBetweenWithDayValue(agreement.get().getStartDate(), new Date()) >= numberOfMonths){
                             agreement.get().setEndDate(new Date());
-                            agreementRepository.save(agreement.get());
                             List<UnitAvailability> unitAvailabilities = unitAvailabilityRepository.findAllByUnit(agreement.get().getRequest().getUnit());
                             if(unitAvailabilities.isEmpty()){
                                 agreement.get().getRequest().getUnit().setAvailability(AvailabilityStatus.UNAVAILABLE);
                             }
                             agreement.get().getRequest().getUnit().setAvailability(AvailabilityStatus.AVAILABLE);
+                            agreementRepository.save(agreement.get());
                             return ResponseEntity.status(HttpStatus.OK).body("Agreement terminated successfully");
                         }
                         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("You can't terminate now (No of Months not met)");
