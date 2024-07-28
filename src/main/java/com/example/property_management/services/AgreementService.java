@@ -3,11 +3,9 @@ package com.example.property_management.services;
 import com.example.property_management.enums.AvailabilityStatus;
 import com.example.property_management.enums.UnitRequestStatus;
 import com.example.property_management.enums.UnitType;
-import com.example.property_management.models.Agreement;
-import com.example.property_management.models.Unit;
-import com.example.property_management.models.UnitRequest;
-import com.example.property_management.models.User;
+import com.example.property_management.models.*;
 import com.example.property_management.repositories.AgreementRepository;
+import com.example.property_management.repositories.UnitAvailabilityRepository;
 import com.example.property_management.repositories.UnitRepository;
 import com.example.property_management.repositories.UnitRequestRepository;
 import lombok.NonNull;
@@ -24,10 +22,7 @@ import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.ZoneId;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class AgreementService {
@@ -41,6 +36,9 @@ public class AgreementService {
 
     @Autowired
     private UnitRepository unitRepository;
+
+    @Autowired
+    private UnitAvailabilityRepository unitAvailabilityRepository;
 
     private boolean isAuthenticated(){
         Authentication authContext = SecurityContextHolder.getContext().getAuthentication();
@@ -62,6 +60,30 @@ public class AgreementService {
     private User getCurrentUser(){
         Authentication authContext = SecurityContextHolder.getContext().getAuthentication();
         return (User) authContext.getPrincipal();
+    }
+
+    int monthsBetweenWithDayValue(Date startDate, Date endDate) {
+        if (startDate == null || endDate == null) {
+            throw new IllegalArgumentException("Both startDate and endDate must be provided");
+        }
+
+        Calendar startCalendar = Calendar.getInstance();
+        startCalendar.setTime(startDate);
+
+        int startDateDayOfMonth = startCalendar.get(Calendar.DAY_OF_MONTH);
+        int startDateTotalMonths = 12 * startCalendar.get(Calendar.YEAR)
+                + startCalendar.get(Calendar.MONTH);
+
+        Calendar endCalendar = Calendar.getInstance();
+        endCalendar.setTime(endDate);
+
+        int endDateDayOfMonth = endCalendar.get(Calendar.DAY_OF_MONTH);
+        int endDateTotalMonths = 12 * endCalendar.get(Calendar.YEAR)
+                + endCalendar.get(Calendar.MONTH);
+
+        return (startDateDayOfMonth > endDateDayOfMonth)
+                ? (endDateTotalMonths - startDateTotalMonths) - 1
+                : (endDateTotalMonths - startDateTotalMonths);
     }
 
     private static Agreement getRentalAgreement(Agreement agreement, UnitRequest unitRequest) {
@@ -105,6 +127,11 @@ public class AgreementService {
                                     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("End your current agreement to create new");
                                 }
                                 Agreement createRentalAgreement = getRentalAgreement(agreement, unitRequest.get());
+                                List<UnitRequest> currentUnitRequests = unitRequestRepository.getAllRequestsByUnit(unit.getId());
+                                for(UnitRequest liveUnitRequest:currentUnitRequests){
+                                    liveUnitRequest.setStatus(UnitRequestStatus.EXPIRED);
+                                    unitRequestRepository.save(liveUnitRequest);
+                                }
                                 agreementRepository.save(createRentalAgreement);
                                 unit.setAvailability(AvailabilityStatus.OCCUPIED);
                                 unitRepository.save(unit);
@@ -115,6 +142,11 @@ public class AgreementService {
                                     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("End your current agreement to create new");
                                 }
                                 Agreement createLeaseAgreement = getLeaseAgreement(agreement, unitRequest.get());
+                                List<UnitRequest> currentUnitRequests = unitRequestRepository.getAllRequestsByUnit(unit.getId());
+                                for(UnitRequest liveUnitRequest:currentUnitRequests){
+                                    liveUnitRequest.setStatus(UnitRequestStatus.EXPIRED);
+                                    unitRequestRepository.save(liveUnitRequest);
+                                }
                                 agreementRepository.save(createLeaseAgreement);
                                 unit.setAvailability(AvailabilityStatus.OCCUPIED);
                                 unitRepository.save(unit);
@@ -168,11 +200,15 @@ public class AgreementService {
                         if(agreement.get().getRequest().getType()==UnitType.LEASE){
                             numberOfMonths = agreement.get().getNumberOfYears()*12;
                         }
-                        if(Period.between((new Date()).toInstant()
-                                .atZone(ZoneId.systemDefault())
-                                .toLocalDate(),agreement.get().getStartDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate()).getMonths() >= numberOfMonths){
+                        log.info("No of Months: {}", monthsBetweenWithDayValue(agreement.get().getStartDate(), new Date()));
+                        if(monthsBetweenWithDayValue(agreement.get().getStartDate(), new Date()) >= numberOfMonths){
                             agreement.get().setEndDate(new Date());
                             agreementRepository.save(agreement.get());
+                            List<UnitAvailability> unitAvailabilities = unitAvailabilityRepository.findAllByUnit(agreement.get().getRequest().getUnit());
+                            if(unitAvailabilities.isEmpty()){
+                                agreement.get().getRequest().getUnit().setAvailability(AvailabilityStatus.UNAVAILABLE);
+                            }
+                            agreement.get().getRequest().getUnit().setAvailability(AvailabilityStatus.AVAILABLE);
                             return ResponseEntity.status(HttpStatus.OK).body("Agreement terminated successfully");
                         }
                         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("You can't terminate now (No of Months not met)");

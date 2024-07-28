@@ -22,4 +22,7 @@ public interface UnitRequestRepository extends JpaRepository<UnitRequest, BigInt
             "JOIN p.owner user " +
             "WHERE user.id = :userId")
     List<UnitRequest> findAllByOwner(Integer userId);
+
+    @Query(value = "select r from UnitRequest r join r.unit u where u.id = :unitId and r.status<>'EXPIRED' ")
+    List<UnitRequest> getAllRequestsByUnit(BigInteger unitId);
 }

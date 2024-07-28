@@ -25,4 +25,10 @@ public class AuthController {
     public ResponseEntity<Object> login(@RequestBody User user){
         return authService.login(user);
     }
+
+    @SneakyThrows
+    @GetMapping("/getCurrentUser")
+    public ResponseEntity<Object> getUserProfile(){
+        return authService.getUserProfile();
+    }
 }

@@ -153,8 +153,10 @@ public class UnitAvailabilityService {
                 if (Objects.equals(unit.get().getProperty().getOwner().getId(), getCurrentUser().getId())) {
                     unitAvailabilityRepository.deleteById(id);
                     if(unitAvailabilityRepository.findAllByUnit(unit.get()).isEmpty()){
-                        unit.get().setAvailability(AvailabilityStatus.UNAVAILABLE);
-                        unitRepository.save(unit.get());
+                        if(unit.get().getAvailability()==AvailabilityStatus.AVAILABLE){
+                            unit.get().setAvailability(AvailabilityStatus.UNAVAILABLE);
+                            unitRepository.save(unit.get());
+                        }
                     }
                     return ResponseEntity.status(HttpStatus.OK).body("Unit availability deleted successfully");
                 }

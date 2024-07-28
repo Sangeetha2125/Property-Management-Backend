@@ -4,5 +4,6 @@ public enum UnitRequestStatus {
     PENDING,
     ACCEPTED,
     REJECTED,
-    DENIED_BY_USER
+    DENIED_BY_USER,
+    EXPIRED
 }
