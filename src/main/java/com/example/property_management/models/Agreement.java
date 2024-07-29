@@ -35,4 +35,7 @@ public class Agreement {
 
     @Column(name = "number_of_years")
     private Integer numberOfYears;
+
+    @Transient
+    private Date lastPaidDate;
 }

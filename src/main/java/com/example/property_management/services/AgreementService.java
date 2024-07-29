@@ -183,11 +183,23 @@ public class AgreementService {
             if(isNotOwner()){
                 Agreement agreement = getLiveAgreement();
                 if(agreement!=null){
+                    agreement.setLastPaidDate(null);
                     return ResponseEntity.status(HttpStatus.OK).body(agreement);
                 }
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No agreement created yet");
             }
             List<Agreement> agreements = agreementRepository.getCurrentAgreementsOfOwner(getCurrentUser().getId());
+            for(Agreement agreement:agreements){
+                agreement.setLastPaidDate(null);
+            }
+            return ResponseEntity.status(HttpStatus.OK).body(agreements);
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized to access this route");
+    }
+
+    public ResponseEntity<Object> getHistoryAgreements() {
+        if(isAuthenticated()){
+            List<Agreement> agreements = agreementRepository.getHistoryAgreements(getCurrentUser().getId());
             return ResponseEntity.status(HttpStatus.OK).body(agreements);
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized to access this route");

@@ -72,6 +72,14 @@ public class UnitService {
         return unit;
     }
 
+    public ResponseEntity<Object> getAllBuyerUnits(){
+        if(isAuthenticated() && isBuyer()) {
+            List<Unit> buyerUnits = unitRepository.findAllByBuyerId(getCurrentUser().getId());
+            return ResponseEntity.status(HttpStatus.OK).body(buyerUnits);
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized to access this route");
+    }
+
     public ResponseEntity<Object> getAllUnits(BigInteger propertyId) {
         if(isAuthenticated()){
             Optional<Property> property = propertyRepository.findById(propertyId);

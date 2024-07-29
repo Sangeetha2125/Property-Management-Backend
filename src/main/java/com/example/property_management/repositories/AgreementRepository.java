@@ -15,4 +15,7 @@ public interface AgreementRepository extends JpaRepository<Agreement, BigInteger
 
     @Query(value = "select a from Agreement a join request r on r.id = a.request.id and r.unit.property.owner.id = :userId and a.request.type<>'BUY' and a.endDate is null")
     List<Agreement> getCurrentAgreementsOfOwner(BigInteger userId);
+
+    @Query(value = "select a from Agreement a join request r on r.id = a.request.id and r.unit.property.owner.id = :userId and a.request.type<>'BUY' and a.endDate is not null")
+    List<Agreement> getHistoryAgreements(BigInteger userId);
 }

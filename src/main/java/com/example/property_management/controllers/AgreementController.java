@@ -33,4 +33,10 @@ public class AgreementController {
     public ResponseEntity<Object> terminateAgreement(@PathVariable BigInteger agreementId){
         return agreementService.terminateAgreement(agreementId);
     }
+
+    @SneakyThrows
+    @GetMapping("/history")
+    public ResponseEntity<Object> getHistoryAgreements() {
+        return agreementService.getHistoryAgreements();
+    }
 }
