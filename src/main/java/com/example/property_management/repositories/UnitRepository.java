@@ -15,11 +15,11 @@ public interface UnitRepository extends JpaRepository<Unit, BigInteger> {
     List<Unit> findAllByPropertyAndAvailability(Property property, AvailabilityStatus availabilityStatus);
 
     @Query(
-            value = "select * from unit u" +
-            "join user" +
-            "on user.id = u.sold_to" +
-            "where user.id = :buyerId",
-            nativeQuery = true
+            value = "select u.id, u.property_id, u.name, u.availability, u.floor, u.square_footage, u.bedrooms, u.bathrooms, u.description, u.sold_to " +
+                    "from unit u " +
+            "join user " +
+            "on user.id = u.sold_to " +
+            "where user.id = :buyerId", nativeQuery = true
     )
     List<Unit> findAllByBuyerId(BigInteger buyerId);
 }
