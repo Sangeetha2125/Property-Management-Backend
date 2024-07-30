@@ -103,6 +103,7 @@ public class AgreementService {
 
     private static Agreement getBuyAgreement(Agreement agreement, UnitRequest unitRequest) {
         Agreement buyAgreement = new Agreement();
+        buyAgreement.setStartDate(new Date());
         buyAgreement.setRequest(unitRequest);
         return buyAgreement;
     }
@@ -157,6 +158,11 @@ public class AgreementService {
                             } else if (unitRequest.get().getType() == UnitType.BUY) {
                                 if(isBuyer()){
                                     Agreement createBuyAgreement = getBuyAgreement(agreement, unitRequest.get());
+                                    List<UnitRequest> currentUnitRequests = unitRequestRepository.getAllRequestsByUnit(unit.getId());
+                                    for(UnitRequest liveUnitRequest:currentUnitRequests){
+                                        liveUnitRequest.setStatus(UnitRequestStatus.EXPIRED);
+                                        unitRequestRepository.save(liveUnitRequest);
+                                    }
                                     agreementRepository.save(createBuyAgreement);
                                     unit.setAvailability(AvailabilityStatus.SOLD_OUT);
                                     unit.setSoldTo(getCurrentUser());

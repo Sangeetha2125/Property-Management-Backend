@@ -9,5 +9,5 @@ import java.util.Date;
 
 public interface TransactionRepository extends JpaRepository<Transaction, BigInteger> {
 //    @Query(value = "select ")
-    Date getLastPaidDate();
+//    Date getLastPaidDate();
 }
