@@ -24,8 +24,8 @@ public class Transaction {
     private BigInteger id;
 
     @ManyToOne
-    @JoinColumn(name = "agreement_id")
-    private Agreement agreement;
+    @JoinColumn(name = "request_id")
+    private UnitRequest request;
 
     @Column(name = "transaction_time")
     @Temporal(TemporalType.TIMESTAMP)

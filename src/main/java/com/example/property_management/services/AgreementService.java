@@ -40,6 +40,9 @@ public class AgreementService {
     @Autowired
     private UnitAvailabilityRepository unitAvailabilityRepository;
 
+    @Autowired
+    private TransactionService transactionService;
+
     private boolean isAuthenticated(){
         Authentication authContext = SecurityContextHolder.getContext().getAuthentication();
         return authContext!=null && authContext.isAuthenticated();
@@ -127,16 +130,19 @@ public class AgreementService {
                                 if(currentAgreement!=null){
                                     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("End your current agreement to create new");
                                 }
-                                Agreement createRentalAgreement = getRentalAgreement(agreement, unitRequest.get());
-                                List<UnitRequest> currentUnitRequests = unitRequestRepository.getAllRequestsByUnit(unit.getId());
-                                for(UnitRequest liveUnitRequest:currentUnitRequests){
-                                    liveUnitRequest.setStatus(UnitRequestStatus.EXPIRED);
-                                    unitRequestRepository.save(liveUnitRequest);
+                                if(transactionService.createFirstTransaction(requestId)){
+                                    Agreement createRentalAgreement = getRentalAgreement(agreement, unitRequest.get());
+                                    List<UnitRequest> currentUnitRequests = unitRequestRepository.getAllRequestsByUnit(unit.getId());
+                                    for(UnitRequest liveUnitRequest:currentUnitRequests){
+                                        liveUnitRequest.setStatus(UnitRequestStatus.EXPIRED);
+                                        unitRequestRepository.save(liveUnitRequest);
+                                    }
+                                    agreementRepository.save(createRentalAgreement);
+                                    unit.setAvailability(AvailabilityStatus.OCCUPIED);
+                                    unitRepository.save(unit);
+                                    return ResponseEntity.status(HttpStatus.OK).body("Rental agreement created successfully");
                                 }
-                                agreementRepository.save(createRentalAgreement);
-                                unit.setAvailability(AvailabilityStatus.OCCUPIED);
-                                unitRepository.save(unit);
-                                return ResponseEntity.status(HttpStatus.OK).body("Rental agreement created successfully");
+                                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Something went wrong");
                             } else if (unitRequest.get().getType() == UnitType.LEASE && agreement.getStartDate() != null && agreement.getNumberOfYears() != null) {
                                 Agreement currentAgreement = getLiveAgreement();
                                 if(currentAgreement!=null){
@@ -145,29 +151,35 @@ public class AgreementService {
                                 if(unitRequest.get().getNoOfMonths()>agreement.getNumberOfYears()*12){
                                     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No of years should obey the minimum months criteria");
                                 }
-                                Agreement createLeaseAgreement = getLeaseAgreement(agreement, unitRequest.get());
-                                List<UnitRequest> currentUnitRequests = unitRequestRepository.getAllRequestsByUnit(unit.getId());
-                                for(UnitRequest liveUnitRequest:currentUnitRequests){
-                                    liveUnitRequest.setStatus(UnitRequestStatus.EXPIRED);
-                                    unitRequestRepository.save(liveUnitRequest);
-                                }
-                                agreementRepository.save(createLeaseAgreement);
-                                unit.setAvailability(AvailabilityStatus.OCCUPIED);
-                                unitRepository.save(unit);
-                                return ResponseEntity.status(HttpStatus.OK).body("Lease agreement created successfully");
-                            } else if (unitRequest.get().getType() == UnitType.BUY) {
-                                if(isBuyer()){
-                                    Agreement createBuyAgreement = getBuyAgreement(agreement, unitRequest.get());
+                                if(transactionService.createFirstTransaction(requestId)){
+                                    Agreement createLeaseAgreement = getLeaseAgreement(agreement, unitRequest.get());
                                     List<UnitRequest> currentUnitRequests = unitRequestRepository.getAllRequestsByUnit(unit.getId());
                                     for(UnitRequest liveUnitRequest:currentUnitRequests){
                                         liveUnitRequest.setStatus(UnitRequestStatus.EXPIRED);
                                         unitRequestRepository.save(liveUnitRequest);
                                     }
-                                    agreementRepository.save(createBuyAgreement);
-                                    unit.setAvailability(AvailabilityStatus.SOLD_OUT);
-                                    unit.setSoldTo(getCurrentUser());
+                                    agreementRepository.save(createLeaseAgreement);
+                                    unit.setAvailability(AvailabilityStatus.OCCUPIED);
                                     unitRepository.save(unit);
-                                    return ResponseEntity.status(HttpStatus.OK).body("Unit bought successfully");
+                                    return ResponseEntity.status(HttpStatus.OK).body("Lease agreement created successfully");
+                                }
+                                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Something went wrong");
+                            } else if (unitRequest.get().getType() == UnitType.BUY) {
+                                if(isBuyer()){
+                                    if(transactionService.createFirstTransaction(requestId)){
+                                        Agreement createBuyAgreement = getBuyAgreement(agreement, unitRequest.get());
+                                        List<UnitRequest> currentUnitRequests = unitRequestRepository.getAllRequestsByUnit(unit.getId());
+                                        for(UnitRequest liveUnitRequest:currentUnitRequests){
+                                            liveUnitRequest.setStatus(UnitRequestStatus.EXPIRED);
+                                            unitRequestRepository.save(liveUnitRequest);
+                                        }
+                                        agreementRepository.save(createBuyAgreement);
+                                        unit.setAvailability(AvailabilityStatus.SOLD_OUT);
+                                        unit.setSoldTo(getCurrentUser());
+                                        unitRepository.save(unit);
+                                        return ResponseEntity.status(HttpStatus.OK).body("Unit bought successfully");
+                                    }
+                                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Something went wrong");
                                 }
                                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized to access this route");
                             }

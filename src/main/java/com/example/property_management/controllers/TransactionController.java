@@ -20,7 +20,7 @@ public class TransactionController {
 
     @SneakyThrows
     @PostMapping("/{agreementId}")
-    public ResponseEntity<Object> createTransaction(@PathVariable BigInteger agreementId){
-        return transactionService.createTransaction(agreementId);
+    public ResponseEntity<Object> createRentalTransaction(@PathVariable BigInteger agreementId){
+        return transactionService.createRentalTransaction(agreementId);
     }
 }
