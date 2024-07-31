@@ -4,10 +4,7 @@ import com.example.property_management.enums.AvailabilityStatus;
 import com.example.property_management.enums.UnitRequestStatus;
 import com.example.property_management.enums.UnitType;
 import com.example.property_management.models.*;
-import com.example.property_management.repositories.AgreementRepository;
-import com.example.property_management.repositories.UnitAvailabilityRepository;
-import com.example.property_management.repositories.UnitRepository;
-import com.example.property_management.repositories.UnitRequestRepository;
+import com.example.property_management.repositories.*;
 import lombok.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,6 +39,9 @@ public class AgreementService {
 
     @Autowired
     private TransactionService transactionService;
+
+    @Autowired
+    private TransactionRepository transactionRepository;
 
     private boolean isAuthenticated(){
         Authentication authContext = SecurityContextHolder.getContext().getAuthentication();
@@ -202,13 +202,16 @@ public class AgreementService {
                 Agreement agreement = getLiveAgreement();
                 if(agreement!=null){
                     agreement.setLastPaidDate(null);
+                    Optional<Date> lastPaidDate = transactionRepository.getLastPaidDate(getCurrentUser().getId());
+                    lastPaidDate.ifPresent(agreement::setLastPaidDate);
                     return ResponseEntity.status(HttpStatus.OK).body(agreement);
                 }
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No agreement created yet");
             }
             List<Agreement> agreements = agreementRepository.getCurrentAgreementsOfOwner(getCurrentUser().getId());
             for(Agreement agreement:agreements){
-                agreement.setLastPaidDate(null);
+                Optional<Date> lastPaidDate = transactionRepository.getLastPaidDate(agreement.getRequest().getUser().getId());
+                lastPaidDate.ifPresent(agreement::setLastPaidDate);
             }
             return ResponseEntity.status(HttpStatus.OK).body(agreements);
         }
