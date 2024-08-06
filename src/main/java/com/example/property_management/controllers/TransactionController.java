@@ -4,10 +4,7 @@ import com.example.property_management.services.TransactionService;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.math.BigInteger;
 
@@ -22,5 +19,9 @@ public class TransactionController {
     @PostMapping("/{agreementId}")
     public ResponseEntity<Object> createRentalTransaction(@PathVariable BigInteger agreementId){
         return transactionService.createRentalTransaction(agreementId);
+    }
+    @GetMapping("/lastTransactionDate/{requestId}")
+    public ResponseEntity<Object> getLastTransactionDate(@PathVariable BigInteger requestId){
+        return transactionService.getLastTransactionDate(requestId);
     }
 }

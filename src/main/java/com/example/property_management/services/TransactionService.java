@@ -17,6 +17,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -79,6 +81,19 @@ public class TransactionService {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized to access this route");
             }
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Agreement not found");
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized to access this route");
+    }
+
+    public ResponseEntity<Object> getLastTransactionDate(BigInteger requestId){
+        if(isAuthenticated()){
+            Optional<Date> lastTransactionDate = transactionRepository.getLastTransactionDate(requestId);
+            if(lastTransactionDate.isPresent()){
+                SimpleDateFormat formatter = new SimpleDateFormat("ddMMyyyy");
+                String strDate = formatter.format(lastTransactionDate.get());
+                return ResponseEntity.status(HttpStatus.OK).body(strDate);
+            }
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No transactions found for this request");
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized to access this route");
     }

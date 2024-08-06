@@ -147,12 +147,18 @@ public class UnitService {
         if(isAuthenticated() && isOwner()){
             Optional<Property> property = propertyRepository.findById(propertyId);
             if(property.isPresent()){
-                Optional<Unit> unit = unitRepository.findById(unitId);
-                if(unit.isPresent()){
+                Optional<Unit> unitOptional = unitRepository.findById(unitId);
+                if(unitOptional.isPresent()){
+                    Unit unit = unitOptional.get();
                     if(Objects.equals(property.get().getOwner().getId(), getCurrentUser().getId())){
-                        requestUnit.setProperty(property.get());
-                        requestUnit.setAvailability(unit.get().getAvailability());
-                        unitRepository.save(requestUnit);
+                        unit.setName(requestUnit.getName());
+                        unit.setFloor(requestUnit.getFloor());
+                        unit.setSquareFootage(requestUnit.getSquareFootage());
+                        unit.setBedrooms(requestUnit.getBedrooms());
+                        unit.setBathrooms(requestUnit.getBathrooms());
+                        unit.setDescription(requestUnit.getDescription());
+                        // No need to set the property and availability as they are not changing
+                        unitRepository.save(unit);
                         return ResponseEntity.status(HttpStatus.OK).body("Unit updated successfully");
                     }
                     return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized to access this route");
@@ -163,4 +169,6 @@ public class UnitService {
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized to access this route");
     }
+
+
 }

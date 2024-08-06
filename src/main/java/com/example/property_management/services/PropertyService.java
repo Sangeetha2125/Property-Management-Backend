@@ -85,20 +85,27 @@ public class PropertyService {
             if(requestProperty.getName()!=null && requestProperty.getCity()!=null && requestProperty.getAddress()!=null && requestProperty.getPincode()!=null && requestProperty.getState()!=null && requestProperty.getNumUnits()!=0 && requestProperty.getType()!=null){
                 Property property = getProperty(requestProperty);
                 propertyRepository.save(property);
+
                 return ResponseEntity.status(HttpStatus.CREATED).body("Property created successfully");
             }
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Fields can't be empty");
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized to access this route");
     }
-
     public ResponseEntity<Object> updateProperty(Property requestProperty, BigInteger id){
         if(isAuthenticated() && isOwner()){
             Optional<Property> property = propertyRepository.findById(id);
             if(property.isPresent()){
                 if(Objects.equals(property.get().getOwner().getId(), getCurrentUser().getId())){
-                    requestProperty.setOwner(getCurrentUser());
-                    propertyRepository.save(requestProperty);
+                    Property existingProperty = property.get();
+                    existingProperty.setName(requestProperty.getName());
+                    existingProperty.setAddress(requestProperty.getAddress());
+                    existingProperty.setState(requestProperty.getState());
+                    existingProperty.setCity(requestProperty.getCity());
+                    existingProperty.setPincode(requestProperty.getPincode());
+                    existingProperty.setNumUnits(requestProperty.getNumUnits());
+                    existingProperty.setType(requestProperty.getType());
+                    propertyRepository.save(existingProperty);
                     return ResponseEntity.status(HttpStatus.OK).body("Property updated successfully");
                 }
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized to access this route");
@@ -107,4 +114,20 @@ public class PropertyService {
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized to access this route");
     }
+
+//    public ResponseEntity<Object> updateProperty(Property requestProperty, BigInteger id){
+//        if(isAuthenticated() && isOwner()){
+//            Optional<Property> property = propertyRepository.findById(id);
+//            if(property.isPresent()){
+//                if(Objects.equals(property.get().getOwner().getId(), getCurrentUser().getId())){
+//                    requestProperty.setOwner(getCurrentUser());
+//                    propertyRepository.save(requestProperty);
+//                    return ResponseEntity.status(HttpStatus.OK).body("Property updated successfully");
+//                }
+//                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized to access this route");
+//            }
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Property not found");
+//        }
+//        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized to access this route");
+//    }
 }
